@@ -1,10 +1,10 @@
 #PMIG
 =================================  
 
-###summary  
+###Summary  
 PMIG is a simple image processing tool.  
-The name PMIG is just a reicky reverse of the powerful open software GIMP.  
-###platform  
+The name PMIG is just a tricky reverse of the powerful open software GIMP.  
+###Platform  
 cross  
 ###Development Platform  
 xubuntu 13.10   
