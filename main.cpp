@@ -1,19 +1,22 @@
-﻿#include "mainwindow.h"
-#include <QApplication>
-#include <QDebug>
+﻿#include <QApplication>
+#include <QSplashScreen>
+#include <QThread>
 
-#include <QTextStream>
+
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    Q_INIT_RESOURCE(resources);
 
-    QString str;
-    QTextStream stream(&str);
-    stream << hex<<100;
-    qDebug()<<str;
-
-    return a.exec();
+    QApplication app(argc, argv);
+//    QSplashScreen *splash = new QSplashScreen;
+//    splash->setPixmap(QPixmap(":images/bg.png"));
+//    splash->show();
+    app.setOrganizationName("PMIG Project");
+    app.setApplicationName("PMIG");
+    MainWindow mainWin;
+    mainWin.resize(1366, 768);
+    mainWin.show();
+    return app.exec();
 }
