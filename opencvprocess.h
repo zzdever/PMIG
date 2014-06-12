@@ -26,6 +26,7 @@ protected:
 
 public:
     int currentImageNum;
+    ToolType::toolType toolType;
 
     bool somethingSelected;
     //QRect rectangleSelection;
@@ -34,19 +35,19 @@ public:
     long int irregularSelectionPointNum;
 
 
-    void drawLineTo(int imageNum, QPoint lastPoint, QPoint currentPoint);
+    void drawLineTo(QPoint lastPoint, QPoint currentPoint);
 
-    IplImage* toolIndicationImage;
+    //IplImage* toolIndicationImage;
     QList<IplImage*> imageStack;
 //    QList<Mat> imageStack;
 
     OpencvProcess(QWidget *parent);
     bool openImage(const char *fileName);
     bool saveImage(const char *fileName, const char *fileFormat);
-    void setCurrentImageNum(int num);
+    //void setCurrentImageNum(int num);
 
-    void ApplyToolFunction(ToolType::toolType toolType, int imageNum, QPoint lastPoint, QPoint currentPoint);
-    void ApplyToolFunction(ToolType::toolType toolType, int imageNum, QPoint currentPoint);
+    void ApplyToolFunction(QPoint lastPoint, QPoint currentPoint);
+    void ApplyToolFunction(QPoint currentPoint);
 
 signals:
     void updateDisplay(int changedImageNum);

@@ -1,5 +1,4 @@
-﻿
-#include <QAction>
+﻿#include <QAction>
 #include <QLayout>
 #include <QMenu>
 #include <QMenuBar>
@@ -149,6 +148,7 @@ void MainWindow::switchToolsToolBar(ToolType::toolType newToolType)
     toolsToolBar[currentToolType]->setHidden(true);
     toolsToolBar[newToolType]->setHidden(false);
     currentToolType=newToolType;
+    centerScribbleArea->setToolType(currentToolType);
 }
 
 void MainWindow::setupMenuBar()

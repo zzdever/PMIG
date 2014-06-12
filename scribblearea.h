@@ -27,6 +27,11 @@ public:
 //    void setPenWidth(int newWidth);
 
     bool isModified() const { return modified; }
+
+    void setToolType(ToolType::toolType type) {
+        toolType=type;
+        opencvProcess->toolType=type;
+        return; }
 //    QColor penColor() const { return myPenColor; }
 //    int penWidth() const { return myPenWidth; }
 
@@ -50,6 +55,7 @@ private:
     QPoint imageCentralPoint;
 
     ToolType::toolType toolType;
+
 
     QImage CVMatToQImage(const Mat& imgMat);
     QImage IplImage2QImage(const IplImage *iplImage, double mini, double maxi);

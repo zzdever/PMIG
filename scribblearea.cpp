@@ -23,7 +23,6 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
         switch(toolType)
         {
         case ToolType::Marquee:
-            //opencvProcess->rectangleSelection.setTopLeft(QPoint(eventX,eventY));
             opencvProcess->vertexA.x=eventX;
             opencvProcess->vertexA.y=eventY;
             break;
@@ -51,11 +50,10 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
             opencvProcess->vertexB.x=eventX;
             opencvProcess->vertexB.y=eventY;
 
-            //drawRectangle
             break;
         }
 
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,QPoint(lastX,lastY),QPoint(eventX,eventY));
+        opencvProcess->ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
 
 
         lastPoint = event->pos();
@@ -71,6 +69,11 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton && isMouseMoving) {
         isMouseMoving = false;
 
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+
         switch(toolType)
         {
         case ToolType::Marquee:
@@ -78,13 +81,12 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             break;
         }
 
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
-            QPoint(lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-               lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)),
-            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
+        opencvProcess->ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
     }
     else {
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+
         switch(toolType)
         {
         case ToolType::Marquee:
@@ -92,9 +94,7 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             break;
         }
 
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
-            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
+        opencvProcess->ApplyToolFunction(QPoint(eventX,eventY));
 
     }
 }
@@ -207,7 +207,6 @@ bool ScribbleArea::openImage(const QString &fileName)
         totalImageNum++;
         currentImageNum = totalImageNum-1;
         opencvProcess->currentImageNum=currentImageNum;
-        //opencvProcess->setCurrentImageNum(currentImageNum);
         updateDisplay(currentImageNum);
         return true;
     }
