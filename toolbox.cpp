@@ -85,7 +85,7 @@ ToolTweak::ToolTweak(const QString &title, QWidget *parent)
 }
 
 //+++++++++++++Brush+Tool+++++++++++++++++++++++++++++++++++++
-int BrushToolBase::brushSize;
+int BrushToolBase::brushSize=2;
 int BrushToolBase::lineType;
 bool BrushToolBase::antiAliasing;
 
@@ -94,6 +94,8 @@ BrushToolTweak::BrushToolTweak(QWidget *parent)
 {
     QSpinBox *sizeSpinBox = new QSpinBox(this);
     sizeSpinBox->setRange(1,100);
+    sizeSpinBox->setValue(2);
+    this->addWidget(new QLabel("size: ",this));
     this->addWidget(sizeSpinBox);
     connect(sizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
 
@@ -121,6 +123,8 @@ EraseToolTweak::EraseToolTweak(QWidget *parent)
 {
     QSpinBox *sizeSpinBox = new QSpinBox(this);
     sizeSpinBox->setRange(1,100);
+    sizeSpinBox->setValue(10);
+    this->addWidget(new QLabel("size: ",this));
     this->addWidget(sizeSpinBox);
     connect(sizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEraseSize(int)));
 }

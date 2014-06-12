@@ -23,15 +23,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     ScribbleArea *centerScribbleArea;
-    ToolBox *toolBoxToolBar;
     QHash<ToolType::toolType, ToolTweak*> toolsToolBar;
     ToolType::toolType currentToolType;
-    //ToolTweak *brushToolTweak;
     QToolBar *toolBox;
-    //OpencvProcess *opencvProcess;
 
-    QTextEdit *center;
-    QList<ToolBar*> toolBars;
+    //QList<ToolBar*> toolBars;
 
     QMenu *fileMenu;
     QMenu *mainWindowMenu;
@@ -44,13 +40,11 @@ class MainWindow : public QMainWindow
     QMenu *destroyDockWidgetMenu;
 
 public:
-//    MainWindow(const QMap<QString, QSize> &customSizeHints,
-//                QWidget *parent = 0, Qt::WindowFlags flags = 0);
-    MainWindow();
-    ~MainWindow();
+    MainWindow(QWidget *parent = 0);
+    //~MainWindow();
 
 protected:
-    //void showEvent(QShowEvent *event);
+    void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
 
 public slots:
@@ -60,12 +54,9 @@ public slots:
     bool maybeSave();
     //void penColor();
 
-    void actionTriggered(QAction *action);
     void saveLayout();
     void loadLayout();
-    void setCorner(int id);
-    //void switchLayoutDirection();
-    void setDockOptions();
+
 
     //void createDockWidget();
     //void destroyDockWidget(QAction *action);
@@ -78,27 +69,19 @@ private:
     void setupToolBar();
     void setupMenuBar();
     void setupWindowWidgets();
+    void setDockOptions();
     void switchToolsToolBar(ToolType::toolType newToolType);
 
     //QMenu *saveAsMenu;
     //QMenu *fileMenu;
 
-
-
-//    QAction *penColorAct;
-//    QAction *penWidthAct;
 //    QAction *printAct;
 //    QAction *clearScreenAct;
 
 private slots:
     void setToolMarquee(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Marquee);
-//            toolBoxToolBar->currentToolBar->setHidden(true);
-//            toolBoxToolBar->currentToolBar = toolBoxToolBar->marqueeToolBar;
-//            toolBoxToolBar->currentToolBar->setHidden(false);
-//            update();
     }
-
     void setToolBrush(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Brush);
     }

@@ -16,42 +16,20 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QBitmap>
+#include <QFontMetrics>
 #include <QtDebug>
 
-//#undef DEBUG_SIZEHINTS
+#define DEBUG_SIZEHINTS
 
 QColor bgColorForName(const QString &name)
 {
-    if (name == "Black")
-        return QColor("#D8D8D8");
-    else if (name == "White")
-        return QColor("#F1F1F1");
-    else if (name == "Red")
-        return QColor("#F1D8D8");
-    else if (name == "Green")
-        return QColor("#D8E4D8");
-    else if (name == "Blue")
-        return QColor("#D8D8F1");
-    else if (name == "Yellow")
-        return QColor("#F1F0D8");
-    return QColor(name).light(110);
+    return QColor("#F1F1F1");
+
 }
 
 QColor fgColorForName(const QString &name)
 {
-    if (name == "Black")
-        return QColor("#6C6C6C");
-    else if (name == "White")
-        return QColor("#F8F8F8");
-    else if (name == "Red")
-        return QColor("#F86C6C");
-    else if (name == "Green")
-        return QColor("#6CB26C");
-    else if (name == "Blue")
-        return QColor("#6C6CF8");
-    else if (name == "Yellow")
-        return QColor("#F8F76C");
-    return QColor(name);
+    return QColor("#F1F1F1").darker(100);
 }
 
 class ColorDock : public QFrame
@@ -77,6 +55,7 @@ protected:
 ColorDock::ColorDock(const QString &c, QWidget *parent)
     : QFrame(parent) , color(c)
 {
+//////////////FONT/////////
     QFont font = this->font();
     font.setPointSize(8);
     setFont(font);
@@ -129,6 +108,7 @@ void ColorDock::paintEvent(QPaintEvent *)
     p.setBrush(bg);
     p.setPen(Qt::black);
     p.drawRect(r);
+///////////DRAW//TEXT////////
     p.drawText(rect(), Qt::AlignLeft|Qt::AlignTop, text);
 #endif // DEBUG_SIZEHINTS
 }
@@ -146,7 +126,7 @@ void ColorDock::changeSizeHints()
 {
     QDialog dialog(this);
     dialog.setWindowTitle(color);
-
+//////USE///OF////LAYOUT//////
     QVBoxLayout *topLayout = new QVBoxLayout(&dialog);
 
     QGridLayout *inputLayout = new QGridLayout();
@@ -224,8 +204,9 @@ ColorSwatch::ColorSwatch(const QString &colorName, QWidget *parent, Qt::WindowFl
     QFrame *swatch = new ColorDock(colorName, this);
     swatch->setFrameStyle(QFrame::Box | QFrame::Sunken);
 
+///////SET/////WODGET/////
     setWidget(swatch);
-
+//////TOGGLE////VIEW////////
     windowWidgetAction = toggleViewAction();
 
 
@@ -302,6 +283,7 @@ ColorSwatch::ColorSwatch(const QString &colorName, QWidget *parent, Qt::WindowFl
     areaActions->addAction(topAction);
     areaActions->addAction(bottomAction);
 
+///////SET////MENU/////ENABLE////
     connect(movableAction, SIGNAL(triggered(bool)), areaActions, SLOT(setEnabled(bool)));
 
     connect(movableAction, SIGNAL(triggered(bool)), allowedAreasActions, SLOT(setEnabled(bool)));
@@ -313,6 +295,7 @@ ColorSwatch::ColorSwatch(const QString &colorName, QWidget *parent, Qt::WindowFl
 
     tabMenu = new QMenu(this);
     tabMenu->setTitle(tr("Tab into"));
+/////ACTION////IN///A///MENU////SIGNAL/////
     connect(tabMenu, SIGNAL(triggered(QAction*)), this, SLOT(tabInto(QAction*)));
 
     splitHMenu = new QMenu(this);
@@ -329,6 +312,7 @@ ColorSwatch::ColorSwatch(const QString &colorName, QWidget *parent, Qt::WindowFl
     connect(windowModifiedAction, SIGNAL(toggled(bool)), this, SLOT(setWindowModified(bool)));
 
     QAction *action = menu->addAction(tr("Raise"));
+/////RAISE///A///WIDGET////
     connect(action, SIGNAL(triggered()), this, SLOT(raise()));
     menu->addAction(changeSizeHintsAction);
     menu->addSeparator();
@@ -347,21 +331,25 @@ ColorSwatch::ColorSwatch(const QString &colorName, QWidget *parent, Qt::WindowFl
     menu->addMenu(tabMenu);
     menu->addSeparator();
     menu->addAction(windowModifiedAction);
+
+//////ABOUT////TO/////SHOW/////SIGNAL/////
+    connect(menu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenu()));
+
+    if(colorName == "Black") {
+        leftAction->setShortcut(Qt::CTRL|Qt::Key_W);
+        rightAction->setShortcut(Qt::CTRL|Qt::Key_E);
+        toggleViewAction()->setShortcut(Qt::CTRL|Qt::Key_R);
+    }
     */
-
-//    connect(menu, SIGNAL(aboutToShow()), this, SLOT(updateContextMenu()));
-
-//    if(colorName == "Black") {
-//        leftAction->setShortcut(Qt::CTRL|Qt::Key_W);
-//        rightAction->setShortcut(Qt::CTRL|Qt::Key_E);
-//        toggleViewAction()->setShortcut(Qt::CTRL|Qt::Key_R);
-//    }
 }
 
 /*
 void ColorSwatch::updateContextMenu()
 {
+//////CAST///TO////PARENT//CLASS////
     QMainWindow *mainWindow = qobject_cast<QMainWindow *>(parentWidget());
+
+///////ACQUIRE///DOCK//AREA////
     const Qt::DockWidgetArea area = mainWindow->dockWidgetArea(this);
     const Qt::DockWidgetAreas areas = allowedAreas();
 
@@ -392,6 +380,7 @@ void ColorSwatch::updateContextMenu()
         allowBottomAction->setEnabled(area != Qt::BottomDockWidgetArea);
     }
 
+//////BLOCK//SIGNALS//////
     leftAction->blockSignals(true);
     rightAction->blockSignals(true);
     topAction->blockSignals(true);
@@ -414,9 +403,11 @@ void ColorSwatch::updateContextMenu()
         bottomAction->setEnabled(areas & Qt::BottomDockWidgetArea);
     }
 
+/////CLEAR////MENU/////
     tabMenu->clear();
     splitHMenu->clear();
     splitVMenu->clear();
+//////FIND///CHILDREN//////
     QList<ColorSwatch*> dock_list = mainWindow->findChildren<ColorSwatch*>();
     foreach (ColorSwatch *dock, dock_list) {
 //        if (!dock->isVisible() || dock->isFloating())
@@ -434,6 +425,8 @@ void ColorSwatch::splitInto(QAction *action)
     QMainWindow *mainWindow = qobject_cast<QMainWindow *>(parentWidget());
     QList<ColorSwatch*> dock_list = mainWindow->findChildren<ColorSwatch*>();
     ColorSwatch *target = 0;
+
+/////ACTION////TEXT///AND////OBJECT///NAME////
     foreach (ColorSwatch *dock, dock_list) {
         if (action->text() == dock->objectName()) {
             target = dock;
@@ -443,8 +436,10 @@ void ColorSwatch::splitInto(QAction *action)
     if (target == 0)
         return;
 
+/////ORIENTATION////AND////ACTION///PARENT////
     Qt::Orientation o = action->parent() == splitHMenu
                         ? Qt::Horizontal : Qt::Vertical;
+////SPLIT/////TWO/////WIDGETS////
     mainWindow->splitDockWidget(target, this, o);
 }
 
@@ -462,9 +457,16 @@ void ColorSwatch::tabInto(QAction *action)
     if (target == 0)
         return;
 
+///////TABIFY///TWO///WIDGETS/////
     mainWindow->tabifyDockWidget(target, this);
 }
 */
+
+
+
+
+
+
 
 void ColorSwatch::contextMenuEvent(QContextMenuEvent *event)
 {

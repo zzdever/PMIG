@@ -7,6 +7,174 @@
 
 #include "scribblearea.h"
 
+
+
+//! [11]
+void ScribbleArea::mousePressEvent(QMouseEvent *event)
+//! [11] //! [12]
+{
+    if(totalImageNum <= 0) return;
+    if (event->button() == Qt::LeftButton) {
+        isMousePressed = true;
+
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+
+        switch(toolType)
+        {
+        case ToolType::Marquee:
+            //opencvProcess->rectangleSelection.setTopLeft(QPoint(eventX,eventY));
+            opencvProcess->vertexA.x=eventX;
+            opencvProcess->vertexA.y=eventY;
+            break;
+        default: break;
+        }
+
+        lastPoint = event->pos();
+    }
+}
+
+void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
+{
+    if(totalImageNum <= 0) return;
+    if ((event->buttons() & Qt::LeftButton) && isMousePressed){
+        isMouseMoving = true;
+
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
+        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+
+        switch(toolType)
+        {
+        case ToolType::Marquee:
+            opencvProcess->vertexB.x=eventX;
+            opencvProcess->vertexB.y=eventY;
+
+            //drawRectangle
+            break;
+        }
+
+        opencvProcess->ApplyToolFunction(toolType, currentImageNum,QPoint(lastX,lastY),QPoint(eventX,eventY));
+
+
+        lastPoint = event->pos();
+
+    }
+}
+
+void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(totalImageNum <= 0) return;
+    isMousePressed = false;
+
+    if (event->button() == Qt::LeftButton && isMouseMoving) {
+        isMouseMoving = false;
+
+        switch(toolType)
+        {
+        case ToolType::Marquee:
+            opencvProcess->somethingSelected=true;
+            break;
+        }
+
+        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
+            QPoint(lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
+               lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)),
+            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
+                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
+    }
+    else {
+        switch(toolType)
+        {
+        case ToolType::Marquee:
+            opencvProcess->somethingSelected=false;
+            break;
+        }
+
+        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
+            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
+                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
+
+    }
+}
+
+
+
+
+
+void ScribbleArea::updateDisplay(int changedImageNum)
+{
+    if(changedImageNum > imageStack.size())
+    {
+        qDebug()<<"Out of bound, no such image opened";
+        return;
+    }
+
+    if(changedImageNum == imageStack.size())
+    {
+        QImage newImage;
+        newImage = IplImage2QImage(
+                    opencvProcess->imageStack[changedImageNum], 0, 1000);
+//        newImage = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
+        imageStack.append(newImage);
+
+        //resizeImage(&imageStack[0], QSize(imageStack[0].width()/2, imageStack[0].height()/2));
+    }
+    else
+    {
+        imageStack[changedImageNum] = IplImage2QImage(
+                    opencvProcess->imageStack[changedImageNum], 0, 1000);
+//        imageStack[changedImageNum] = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
+        modified=true;
+    }
+
+    update();
+}
+
+//! [12] //! [13]
+void ScribbleArea::paintEvent(QPaintEvent *event)
+//! [13] //! [14]
+{
+    QPainter painter(this);
+//    QRect dirtyRect = event->rect();
+//    painter.drawImage(dirtyRect, image, dirtyRect);
+
+    /// @note can be optimized, update one small area one time
+    if(imageStack.size()>0)
+    {
+        for(int i=0; i<imageStack.size(); i++)
+        {
+            painter.drawImage(imageCentralPoint.x()-imageStack[i].width()/2,
+                imageCentralPoint.y()-imageStack[i].height()/2,
+                imageStack[i]);
+        }
+    }
+}
+//! [14]
+
+//! [15]
+void ScribbleArea::resizeEvent(QResizeEvent *event)
+//! [15] //! [16]
+{
+//    if (width() > image.width() || height() > image.height()) {
+//        int newWidth = qMax(width() + 128, image.width());
+//        int newHeight = qMax(height() + 128, image.height());
+//        resizeImage(&image, QSize(newWidth, newHeight));
+//        update();
+//    }
+    imageCentralPoint.setX(this->width()/2);
+    imageCentralPoint.setY(this->height()/2);
+    QWidget::resizeEvent(event);
+}
+
+
+
+
+
+
+
+//!
 //! [0]
 ScribbleArea::ScribbleArea(QWidget *parent)
     : QWidget(parent),
@@ -38,7 +206,8 @@ bool ScribbleArea::openImage(const QString &fileName)
     {
         totalImageNum++;
         currentImageNum = totalImageNum-1;
-        opencvProcess->setCurrentImageNum(currentImageNum);
+        opencvProcess->currentImageNum=currentImageNum;
+        //opencvProcess->setCurrentImageNum(currentImageNum);
         updateDisplay(currentImageNum);
         return true;
     }
@@ -57,10 +226,11 @@ bool ScribbleArea::openImage(const QString &fileName)
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 //! [3] //! [4]
 {
-    QImage visibleImage = image;
+//    QImage visibleImage = image;
 //    resizeImage(&visibleImage, size());
 
-    if (visibleImage.save(fileName, fileFormat)) {
+    if(opencvProcess->saveImage(&(fileName.toStdString()[0]), fileFormat)){
+//    if (visibleImage.save(fileName, fileFormat)) {
         modified = false;
         return true;
     } else {
@@ -95,112 +265,6 @@ bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 //}
 ////! [10]
 
-//! [11]
-void ScribbleArea::mousePressEvent(QMouseEvent *event)
-//! [11] //! [12]
-{
-    //opencvProcess->mousePressEvent(event);
-    if (event->button() == Qt::LeftButton) {
-        lastPoint = event->pos();
-        isMousePressed = true;
-    }
-}
-
-void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
-{
-    if ((event->buttons() & Qt::LeftButton) && isMousePressed)
-    {
-        isMouseMoving = true;
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
-            QPoint(lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-               lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)),
-            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
-        lastPoint = event->pos();
-    }
-}
-
-void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
-{
-    isMousePressed = false;
-
-    if (event->button() == Qt::LeftButton && isMouseMoving) {
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
-            QPoint(lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-               lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)),
-            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
-        isMouseMoving = false;
-    }
-    else {
-        opencvProcess->ApplyToolFunction(toolType, currentImageNum,
-            QPoint(event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2),
-                         event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2)));
-    }
-}
-
-void ScribbleArea::updateDisplay(int changedImageNum)
-{
-    if(changedImageNum > imageStack.size())
-    {
-        qDebug()<<"Out of bound, no such image opened";
-        return;
-    }
-
-    if(changedImageNum == imageStack.size())
-    {
-        QImage newImage;
-        newImage = IplImage2QImage(
-                    opencvProcess->imageStack[changedImageNum], 0, 1000);
-//        newImage = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
-        imageStack.append(newImage);
-
-        //resizeImage(&imageStack[0], QSize(imageStack[0].width()/2, imageStack[0].height()/2));
-    }
-    else
-    {
-        imageStack[changedImageNum] = IplImage2QImage(
-                    opencvProcess->imageStack[changedImageNum], 0, 1000);
-//        imageStack[changedImageNum] = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
-    }
-
-    update();
-}
-
-//! [12] //! [13]
-void ScribbleArea::paintEvent(QPaintEvent *event)
-//! [13] //! [14]
-{
-    QPainter painter(this);
-    QRect dirtyRect = event->rect();
-    painter.drawImage(dirtyRect, image, dirtyRect);
-    if(imageStack.size()>0)
-    {
-        for(int i=0; i<imageStack.size(); i++)
-        {
-            painter.drawImage(imageCentralPoint.x()-imageStack[i].width()/2,
-                imageCentralPoint.y()-imageStack[i].height()/2,
-                imageStack[i]);
-        }
-    }
-}
-//! [14]
-
-//! [15]
-void ScribbleArea::resizeEvent(QResizeEvent *event)
-//! [15] //! [16]
-{
-    if (width() > image.width() || height() > image.height()) {
-        int newWidth = qMax(width() + 128, image.width());
-        int newHeight = qMax(height() + 128, image.height());
-//        resizeImage(&image, QSize(newWidth, newHeight));
-        update();
-    }
-    imageCentralPoint.setX(this->width()/2);
-    imageCentralPoint.setY(this->height()/2);
-    QWidget::resizeEvent(event);
-}
-//! [16]
 
 ////! [17]
 //void ScribbleArea::drawLineTo(const QPoint &endPoint)
@@ -236,24 +300,24 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
 ////! [20]
 
 //! [21]
-void ScribbleArea::print()
-{
-#if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
-    QPrinter printer(QPrinter::HighResolution);
+//void ScribbleArea::print()
+//{
+//#if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
+//    QPrinter printer(QPrinter::HighResolution);
 
-    QPrintDialog printDialog(&printer, this);
-//! [21] //! [22]
-    if (printDialog.exec() == QDialog::Accepted) {
-        QPainter painter(&printer);
-        QRect rect = painter.viewport();
-        QSize size = image.size();
-        size.scale(rect.size(), Qt::KeepAspectRatio);
-        painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
-        painter.setWindow(image.rect());
-        painter.drawImage(0, 0, image);
-    }
-#endif // QT_NO_PRINTER
-}
+//    QPrintDialog printDialog(&printer, this);
+////! [21] //! [22]
+//    if (printDialog.exec() == QDialog::Accepted) {
+//        QPainter painter(&printer);
+//        QRect rect = painter.viewport();
+//        QSize size = image.size();
+//        size.scale(rect.size(), Qt::KeepAspectRatio);
+//        painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
+//        painter.setWindow(image.rect());
+//        painter.drawImage(0, 0, image);
+//    }
+//#endif // QT_NO_PRINTER
+//}
 //! [22]
 
 

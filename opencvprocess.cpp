@@ -6,6 +6,7 @@ OpencvProcess::OpencvProcess(QWidget *parent)
     :QObject(parent)
 {
     currentImageNum=-1;
+    somethingSelected=false;
 
     brushToolFunction = new BrushToolFunction(parent);
 }
@@ -36,9 +37,9 @@ bool OpencvProcess::openImage(const char*fileName)
     }
 }
 
-void OpencvProcess::saveImage(const char*fileName)
+bool OpencvProcess::saveImage(const char *fileName, const char *fileFormat)
 {
-    ;
+    return true;
 }
 
 //void OpencvProcess::setTotalImageNum(int num)

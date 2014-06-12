@@ -1,8 +1,4 @@
-﻿#include "mainwindow.h"
-#include "colorswatch.h"
-#include "toolbar.h"
-
-//#include <QtWidgets>
+﻿
 #include <QAction>
 #include <QLayout>
 #include <QMenu>
@@ -25,19 +21,24 @@
 #include <QImageWriter>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
-#include <qdebug.h>
-
-
+#include <QBitmap>
 #include <QtEvents>
 #include <QFrame>
 #include <QMainWindow>
+#include <qdebug.h>
+
+
+#include "mainwindow.h"
+#include "colorswatch.h"
+#include "toolbar.h"
+
+
+#define TILE_SIZE 100
 
 Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
-//MainWindow::MainWindow(const QMap<QString, QSize> &customSizeHints,
-//                        QWidget *parent, Qt::WindowFlags flags)
-MainWindow::MainWindow()
-//    : QMainWindow(parent, flags)
+MainWindow::MainWindow(QWidget *parent)
+    :QMainWindow(parent)
 {
     setObjectName("MainWindow");
     setWindowTitle("PMIG");
@@ -45,24 +46,40 @@ MainWindow::MainWindow()
     centerScribbleArea = new ScribbleArea(this);
     setCentralWidget(centerScribbleArea);
 
-    //toolBoxToolBar = new ToolBox(this);
-//    foreach(QToolBar* tmpToolBar, toolBoxToolBar->toolBarList)
-//    {
-//        addToolBar(Qt::TopToolBarArea,tmpToolBar);
-//        if(toolBoxToolBar->currentToolBar != tmpToolBar)
-//            tmpToolBar->setHidden(true);
-//    }
+    centerScribbleArea->setAutoFillBackground(true);
+    QPixmap bg(TILE_SIZE, TILE_SIZE);
+    QPainter bgPainter(&bg);
+    bgPainter.setPen(QPen(Qt::white,0));
+    bgPainter.setBrush(QBrush(QColor(245,245,245)));
+    bgPainter.drawRect(0, 0, TILE_SIZE/2, TILE_SIZE/2);
+    bgPainter.setBrush(QBrush(Qt::white));
+    bgPainter.drawRect(TILE_SIZE/2, 0, TILE_SIZE/2, TILE_SIZE/2);
+    bgPainter.setBrush(QBrush(Qt::white));
+    bgPainter.drawRect(0, TILE_SIZE/2, TILE_SIZE/2, TILE_SIZE/2);
+    bgPainter.setBrush(QBrush(QColor(245,245,245)));
+    bgPainter.drawRect(TILE_SIZE/2, TILE_SIZE/2, TILE_SIZE/2, TILE_SIZE/2);
+    QPalette bgPalette;
+    bgPalette.setBrush(QPalette::Background, QBrush(bg));
+    centerScribbleArea->setPalette(bgPalette);
 
-//    opencvProcess = new OpencvProcess;
-//    connect(opencvProcess, &OpencvProcess::updateDisplay, this, &ScribbleArea::updateDisplay);
+    centerScribbleArea->setFocusPolicy(Qt::WheelFocus);
 
     setupToolBar();
     setupMenuBar();
     setupWindowWidgets();
+    setDockOptions();
 
-    centerScribbleArea->setFocus();
     statusBar()->showMessage(tr("Ready"));
 
+}
+
+//MainWindow::~MainWindow()
+//{
+//    ;
+//}
+
+void MainWindow::setupToolBar()
+{
     currentToolType = ToolType::Brush;
 
     toolsToolBar.insert(ToolType::Brush, new BrushToolTweak(this));
@@ -71,20 +88,8 @@ MainWindow::MainWindow()
         addToolBar(toolsToolBar[tmp]);
     }
     toolsToolBar[currentToolType]->setHidden(false);
-}
 
-MainWindow::~MainWindow()
-{
-    //delete toolBox;
-}
 
-void MainWindow::actionTriggered(QAction *action)
-{
-    qDebug("action '%s' triggered", action->text().toLocal8Bit().data());
-}
-
-void MainWindow::setupToolBar()
-{
     QActionGroup *toolBoxGroup = new QActionGroup(this);
     toolBoxGroup->setExclusive(true);
 
@@ -98,6 +103,7 @@ void MainWindow::setupToolBar()
     brushAct->setShortcut(Qt::Key_B);
     brushAct->setStatusTip(tr("To brush strokes"));
     brushAct->setCheckable(true);
+    brushAct->setChecked(true);
     connect(brushAct,SIGNAL(toggled(bool)),this,SLOT(setToolBrush(bool)));
 
     QAction *penAct = new QAction(QIcon(":images/pen-tool.png"),tr("&Pen tool (P)"),this);
@@ -125,6 +131,7 @@ void MainWindow::setupToolBar()
     toolBox->setOrientation(Qt::Vertical);
     toolBox->setFloatable(false);
     toolBox->setMovable(false);
+    //toolBox->setFocusPolicy(Qt::WheelFocus);
 
 
     toolBox->addAction(marqueeAct);
@@ -132,11 +139,6 @@ void MainWindow::setupToolBar()
     toolBox->addAction(penAct);
     toolBox->addAction(eraseAct);
 
-//    for (int i = 0; i < 3; ++i) {
-//        ToolBar *tb = new ToolBar(QString::fromLatin1("Tool Bar %1").arg(i + 1), this);
-//        toolBars.append(tb);
-//        addToolBar(tb);
-//    }
 }
 
 void MainWindow::switchToolsToolBar(ToolType::toolType newToolType)
@@ -188,57 +190,16 @@ void MainWindow::setupMenuBar()
     fileMenu->addMenu(saveAsMenu);
     fileMenu->addAction(printAct);
     fileMenu->addSeparator();
+    QAction *layoutAct = fileMenu->addAction(tr("Save layout..."));
+    connect(layoutAct, SIGNAL(triggered()), this, SLOT(saveLayout()));
+    layoutAct = fileMenu->addAction(tr("Load layout..."));
+    connect(layoutAct, SIGNAL(triggered()), this, SLOT(loadLayout()));
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
 
-
-//    QMenu *menu = menuBar()->addMenu(tr("&File"));
-
-//    QAction *action = menu->addAction(tr("Save layout..."));
-//    connect(action, SIGNAL(triggered()), this, SLOT(saveLayout()));
-
-//    action = menu->addAction(tr("Load layout..."));
-//    connect(action, SIGNAL(triggered()), this, SLOT(loadLayout()));
-
-//    action = menu->addAction(tr("Switch layout direction"));
-//    connect(action, SIGNAL(triggered()), this, SLOT(switchLayoutDirection()));
-
-//    menu->addSeparator();
-
-//    menu->addAction(tr("&Quit"), this, SLOT(close()));
-
-    mainWindowMenu = menuBar()->addMenu(tr("Main window"));
-
-    QAction *action = mainWindowMenu->addAction(tr("Animated docks"));
-    action->setCheckable(true);
-    action->setChecked(dockOptions() & AnimatedDocks);
-    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-    action = mainWindowMenu->addAction(tr("Allow nested docks"));
-    action->setCheckable(true);
-    action->setChecked(dockOptions() & AllowNestedDocks);
-    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-    action = mainWindowMenu->addAction(tr("Allow tabbed docks"));
-    action->setCheckable(true);
-    action->setChecked(dockOptions() & AllowTabbedDocks);
-    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-    action = mainWindowMenu->addAction(tr("Force tabbed docks"));
-    action->setCheckable(true);
-    action->setChecked(dockOptions() & ForceTabbedDocks);
-    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-    action = mainWindowMenu->addAction(tr("Vertical tabs"));
-    action->setCheckable(true);
-    action->setChecked(dockOptions() & VerticalTabs);
-    connect(action, SIGNAL(toggled(bool)), this, SLOT(setDockOptions()));
-
-//    QMenu *toolBarMenu = menuBar()->addMenu(tr("Tool bars"));
-//    for (int i = 0; i < toolBars.count(); ++i)
-//        toolBarMenu->addMenu(toolBars.at(i)->menu);
-
     windowWidgetMenu = menuBar()->addMenu(tr("&Window"));
+
 
     aboutMenu = new QMenu(tr("&About"), this);
     QAction *aboutAct = new QAction(tr("About PMIG"), this);
@@ -254,21 +215,15 @@ void MainWindow::setupMenuBar()
 
 void MainWindow::setDockOptions()
 {
-    DockOptions opts;
-    QList<QAction*> actions = mainWindowMenu->actions();
+    DockOptions dockOptions = AnimatedDocks|AllowTabbedDocks|ForceTabbedDocks;
+    QMainWindow::setDockOptions(dockOptions);
 
-    if (actions.at(0)->isChecked())
-        opts |= AnimatedDocks;
-    if (actions.at(1)->isChecked())
-        opts |= AllowNestedDocks;
-    if (actions.at(2)->isChecked())
-        opts |= AllowTabbedDocks;
-    if (actions.at(3)->isChecked())
-        opts |= ForceTabbedDocks;
-    if (actions.at(4)->isChecked())
-        opts |= VerticalTabs;
 
-    QMainWindow::setDockOptions(opts);
+//    QList<QAction*> actions = mainWindowMenu->actions();
+//    if (actions.at(0)->isChecked())
+//        opts |= AnimatedDocks;
+//    if (actions.at(1)->isChecked())
+//        opts |= AllowNestedDocks;
 }
 
 void MainWindow::saveLayout()
@@ -363,36 +318,15 @@ void MainWindow::setupWindowWidgets()
 {
     qRegisterMetaType<QDockWidget::DockWidgetFeatures>();
 
-    mapper = new QSignalMapper(this);
-    connect(mapper, SIGNAL(mapped(int)), this, SLOT(setCorner(int)));
+//    mapper = new QSignalMapper(this);
+//    connect(mapper, SIGNAL(mapped(int)), this, SLOT(setCorner(int)));
 
-    /*
-    QMenu *corner_menu = dockWidgetMenu->addMenu(tr("Top left corner"));
-    QActionGroup *group = new QActionGroup(this);
-    group->setExclusive(true);
-    ::addAction(corner_menu, tr("Top dock area"), group, mapper, 0);
-    ::addAction(corner_menu, tr("Left dock area"), group, mapper, 1);
+//    QMenu *corner_menu = dockWidgetMenu->addMenu(tr("Top left corner"));
+//    QActionGroup *group = new QActionGroup(this);
+//    group->setExclusive(true);
+//    ::addAction(corner_menu, tr("Top dock area"), group, mapper, 0);
+//    ::addAction(corner_menu, tr("Left dock area"), group, mapper, 1);
 
-    corner_menu = dockWidgetMenu->addMenu(tr("Top right corner"));
-    group = new QActionGroup(this);
-    group->setExclusive(true);
-    ::addAction(corner_menu, tr("Top dock area"), group, mapper, 2);
-    ::addAction(corner_menu, tr("Right dock area"), group, mapper, 3);
-
-    corner_menu = dockWidgetMenu->addMenu(tr("Bottom left corner"));
-    group = new QActionGroup(this);
-    group->setExclusive(true);
-    ::addAction(corner_menu, tr("Bottom dock area"), group, mapper, 4);
-    ::addAction(corner_menu, tr("Left dock area"), group, mapper, 5);
-
-    corner_menu = dockWidgetMenu->addMenu(tr("Bottom right corner"));
-    group = new QActionGroup(this);
-    group->setExclusive(true);
-    ::addAction(corner_menu, tr("Bottom dock area"), group, mapper, 6);
-    ::addAction(corner_menu, tr("Right dock area"), group, mapper, 7);
-
-    dockWidgetMenu->addSeparator();
-    */
 
     static const struct Set {
         const char * name;
@@ -410,55 +344,27 @@ void MainWindow::setupWindowWidgets()
 
     for (int i = 0; i < setCount; ++i) {
         ColorSwatch *swatch = new ColorSwatch(tr(sets[i].name), this, Qt::WindowFlags(sets[i].flags));
-//        if (i%2)
-//            swatch->setWindowIcon(QIcon(QPixmap(":/res/qt.png")));
-//        if (qstrcmp(sets[i].name, "Blue") == 0) {
-//            BlueTitleBar *titlebar = new BlueTitleBar(swatch);
-//            swatch->setTitleBarWidget(titlebar);
-//            connect(swatch, SIGNAL(topLevelChanged(bool)), titlebar, SLOT(updateMask()));
-//            connect(swatch, SIGNAL(featuresChanged(QDockWidget::DockWidgetFeatures)), titlebar, SLOT(updateMask()), Qt::QueuedConnection);
-
-//        }
-
         addDockWidget(sets[i].area, swatch);
         windowWidgetMenu->addAction(swatch->windowWidgetAction);
+
     }
+
+    QMainWindow::setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+    QMainWindow::setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
+    //        if (qstrcmp(sets[i].name, "Blue") == 0) {
+    //            BlueTitleBar *titlebar = new BlueTitleBar(swatch);
+    //            swatch->setTitleBarWidget(titlebar);
+    //            connect(swatch, SIGNAL(topLevelChanged(bool)), titlebar, SLOT(updateMask()));
+    //            connect(swatch, SIGNAL(featuresChanged(QDockWidget::DockWidgetFeatures)), titlebar, SLOT(updateMask()), Qt::QueuedConnection);
+    //        }
 }
 
-void MainWindow::setCorner(int id)
+
+void MainWindow::showEvent(QShowEvent *event)
 {
-    switch (id) {
-        case 0:
-            QMainWindow::setCorner(Qt::TopLeftCorner, Qt::TopDockWidgetArea);
-            break;
-        case 1:
-            QMainWindow::setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-            break;
-        case 2:
-            QMainWindow::setCorner(Qt::TopRightCorner, Qt::TopDockWidgetArea);
-            break;
-        case 3:
-            QMainWindow::setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
-            break;
-        case 4:
-            QMainWindow::setCorner(Qt::BottomLeftCorner, Qt::BottomDockWidgetArea);
-            break;
-        case 5:
-            QMainWindow::setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-            break;
-        case 6:
-            QMainWindow::setCorner(Qt::BottomRightCorner, Qt::BottomDockWidgetArea);
-            break;
-        case 7:
-            QMainWindow::setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-            break;
-    }
+    QMainWindow::showEvent(event);
 }
-
-//void MainWindow::showEvent(QShowEvent *event)
-//{
-//    QMainWindow::showEvent(event);
-//}
 
 
 
@@ -473,9 +379,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 //! [2]
 
-//! [3]
 void MainWindow::openFile()
-//! [3] //! [4]
 {
     if (maybeSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
@@ -483,12 +387,9 @@ void MainWindow::openFile()
         if (!fileName.isEmpty())
         {
             centerScribbleArea->openImage(fileName);
-//            cvImg = cvLoadImage(&(fileName.toStdString()[0]));
-//            centerScribbleArea->openImage(fileName, cvImg);
         }
     }
 }
-//! [4]
 
 
 
@@ -522,7 +423,7 @@ bool MainWindow::maybeSave()
 {
     if (centerScribbleArea->isModified()) {
        QMessageBox::StandardButton ret;
-       ret = QMessageBox::warning(this, tr("Scribble"),
+       ret = QMessageBox::warning(this, tr("Modified"),
                           tr("The image has been modified.\n"
                              "Do you want to save your changes?"),
                           QMessageBox::Save | QMessageBox::Discard
@@ -535,8 +436,6 @@ bool MainWindow::maybeSave()
     }
     return true;
 }
-
-
 
 //! [7]
 //void MainWindow::penColor()
@@ -562,9 +461,7 @@ bool MainWindow::maybeSave()
 //}
 ////! [10]
 
-//! [11]
 void MainWindow::about()
-//! [11] //! [12]
 {
     QMessageBox::about(this, tr("About PMIG"),
             tr("<p><b>PMIG</b> is a simple image processing tool.</p>"
@@ -573,19 +470,9 @@ void MainWindow::about()
 }
 
 
-//! [18]
-
-//! [19]
-
 
 /*
-void MainWindow::switchLayoutDirection()
-{
-    if (layoutDirection() == Qt::LeftToRight)
-        qApp->setLayoutDirection(Qt::RightToLeft);
-    else
-        qApp->setLayoutDirection(Qt::LeftToRight);
-}
+
 
 class CreateDockWidgetDialog : public QDialog
 {

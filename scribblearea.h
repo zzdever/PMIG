@@ -32,13 +32,14 @@ public:
 
 public slots:
 //    void clearImage();
-    void print();
+    //void print();
     void updateDisplay(int changedImageNum);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+//    void mouseDoubleClickEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
 
@@ -55,10 +56,10 @@ private:
 
 
     bool modified;
-    bool scribbling;
-    int myPenWidth;
-    QColor myPenColor;
-    QImage image;
+    //bool scribbling;
+    //int myPenWidth;
+    //QColor myPenColor;
+    //QImage image;
     QPoint lastPoint;
     bool isMouseMoving;
     bool isMousePressed;
