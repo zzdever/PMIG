@@ -53,11 +53,27 @@ void OpencvProcess::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
     default:
         break;
     }
+
+    //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
+    emit updateDisplay(currentImageNum);
 }
 
 void OpencvProcess::ApplyToolFunction(QPoint currentPoint)
 {
     ;
+}
+
+void OpencvProcess::ApplyToolFunction()
+{
+    switch (toolType) {
+    case ToolType::Erase:
+        cvRectangle(imageStack[currentImageNum], vertexA, vertexB, CV_RGB(255,255,255), -1);
+        break;
+    default:
+        break;
+    }
+
+    emit updateDisplay(currentImageNum);
 }
 
 void OpencvProcess::drawLineTo(QPoint lastPoint, QPoint currentPoint)
@@ -80,9 +96,6 @@ void OpencvProcess::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 
     //line( image, pt1, pt2,  Scalar(icolor&255, (icolor>>8)&255, (icolor>>16)&255), rng.uniform(1,10), lineType );
     cvLine(imageStack[currentImageNum], pt1, pt2, cvScalar(100,50,50,50), brushToolFunction->getBrushSize(), lineType);
-
-    //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
-    emit updateDisplay(currentImageNum);
 
     return;
 }

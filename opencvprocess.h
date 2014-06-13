@@ -48,6 +48,7 @@ public:
 
     void ApplyToolFunction(QPoint lastPoint, QPoint currentPoint);
     void ApplyToolFunction(QPoint currentPoint);
+    void ApplyToolFunction();
 
 signals:
     void updateDisplay(int changedImageNum);

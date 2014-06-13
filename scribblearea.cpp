@@ -194,7 +194,17 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
+void ScribbleArea::keyPressEvent(QKeyEvent *event)
+{
+    if(event->matches(QKeySequence::Delete))
+    {qDebug()<<opencvProcess->somethingSelected;
+        if(opencvProcess->somethingSelected == false) return;
 
+        opencvProcess->toolType = ToolType::Erase;
+        opencvProcess->ApplyToolFunction();
+        opencvProcess->toolType = toolType;
+    }
+}
 
 
 
@@ -239,8 +249,14 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 bool ScribbleArea::openImage(const QString &fileName)
 //! [1] //! [2]
 {
-//    if (!loadedImage.load(fileName))
-//        return false;
+    if(totalImageNum == 1)
+    {
+        QMessageBox *tmpMessage = new QMessageBox(this);
+        tmpMessage->setText("Sorry, currently only one layer is supported,");
+        tmpMessage->show();
+        return false;
+    }
+
     if(opencvProcess->openImage(&(fileName.toStdString()[0])))
     {
         totalImageNum++;
