@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QWidget>
 #include <QDebug>
 
 #include "toolbox.h"
@@ -116,7 +117,7 @@ BrushToolFunction::BrushToolFunction(QWidget *parent)
 
 
 //+++++++++++ERASE+TOOL+++++++++++++++++++++++++++++++++++++++
-int EraseToolBase::eraseSize;
+int EraseToolBase::eraseSize=10;
 int EraseToolBase::eraseShape;
 
 EraseToolTweak::EraseToolTweak(QWidget *parent)

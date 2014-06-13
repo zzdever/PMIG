@@ -15,18 +15,20 @@
 
 using namespace cv;
 
-class OpencvProcess:public QObject
+class OpencvProcess:public QWidget
 {
     Q_OBJECT
 
 private:
+    ToolType::toolType toolType;
     BrushToolFunction *brushToolFunction;
+    EraseToolFunction *eraseToolFunction;
 
 protected:
 
 public:
     int currentImageNum;
-    ToolType::toolType toolType;
+
 
     bool somethingSelected;
     //QRect rectangleSelection;
@@ -34,6 +36,7 @@ public:
     QVector<CvPoint> irregularSelectionPoints;
     long int irregularSelectionPointNum;
 
+    void setToolType(ToolType::toolType toolType);
 
     void drawLineTo(QPoint lastPoint, QPoint currentPoint);
 
@@ -49,6 +52,9 @@ public:
     void ApplyToolFunction(QPoint lastPoint, QPoint currentPoint);
     void ApplyToolFunction(QPoint currentPoint);
     void ApplyToolFunction();
+
+public slots:
+    void updateCursor();
 
 signals:
     void updateDisplay(int changedImageNum);

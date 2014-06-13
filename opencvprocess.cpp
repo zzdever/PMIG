@@ -1,15 +1,20 @@
 ﻿#include <QMouseEvent>
+#include <QWidget>
+#include <QPainter>
+#include <QBitmap>
 
 #include "opencvprocess.h"
 
 OpencvProcess::OpencvProcess(QWidget *parent)
-    :QObject(parent)
+    :QWidget(parent)
 {
     currentImageNum=-1;
     toolType=ToolType::Brush;
     somethingSelected=false;
 
-    brushToolFunction = new BrushToolFunction(parent);
+    brushToolFunction = new BrushToolFunction(this);
+    eraseToolFunction = new EraseToolFunction(this);
+
 }
 
 bool OpencvProcess::openImage(const char*fileName)
@@ -43,6 +48,30 @@ bool OpencvProcess::saveImage(const char *fileName, const char *fileFormat)
     return true;
 }
 
+void OpencvProcess::updateCursor()
+{
+    switch(toolType)
+    {
+    case ToolType::Marquee:
+        parentWidget()->setCursor(QCursor(Qt::CrossCursor));
+        break;
+    case ToolType::Erase:
+    {
+        QPixmap cursorPixmap(eraseToolFunction->getEraseSize(), eraseToolFunction->getEraseSize());
+        cursorPixmap.fill(Qt::white);
+        parentWidget()->setCursor(QCursor(cursorPixmap));
+    }
+        break;
+    default:
+        parentWidget()->setCursor(QCursor(Qt::ArrowCursor));
+        break;
+    }
+}
+
+void OpencvProcess::setToolType(ToolType::toolType toolType)
+{
+    this->toolType = toolType;
+}
 
 void OpencvProcess::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
 {
@@ -60,7 +89,20 @@ void OpencvProcess::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
 
 void OpencvProcess::ApplyToolFunction(QPoint currentPoint)
 {
-    ;
+    switch(toolType){
+    case ToolType::Erase:
+        vertexA.x=currentPoint.rx() - eraseToolFunction->getEraseSize()/2;
+        vertexA.y=currentPoint.ry() - eraseToolFunction->getEraseSize()/2;
+        vertexB.x=vertexA.x + eraseToolFunction->getEraseSize();
+        vertexB.y=vertexA.y + eraseToolFunction->getEraseSize();
+        ApplyToolFunction();
+        break;
+    default:
+        break;
+    }
+
+    //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
+    emit updateDisplay(currentImageNum);
 }
 
 void OpencvProcess::ApplyToolFunction()

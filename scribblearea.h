@@ -30,10 +30,8 @@ public:
 
     bool isModified() const { return modified; }
 
-    void setToolType(ToolType::toolType type) {
-        toolType=type;
-        opencvProcess->toolType=type;
-        return; }
+    void setToolType(ToolType::toolType type);
+
 //    QColor penColor() const { return myPenColor; }
 //    int penWidth() const { return myPenWidth; }
 
@@ -46,6 +44,7 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void enterEvent(QEvent * event);
 //    void mouseDoubleClickEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);

@@ -107,6 +107,8 @@ public:
 private slots:
     void setEraseSize(int value){eraseSize=value;}
     void setEraseShape(int value){eraseShape=value;}
+
+signals:
 };
 
 class EraseToolFunction
