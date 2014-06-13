@@ -3,6 +3,8 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QWidget>
+#include <QAction>
+#include <QFrame>
 #include <QDebug>
 
 #include "toolbox.h"
@@ -97,6 +99,14 @@ BrushToolTweak::BrushToolTweak(QWidget *parent)
     QSpinBox *sizeSpinBox = new QSpinBox(this);
     sizeSpinBox->setRange(1,100);
     sizeSpinBox->setValue(2);
+    QAction *autoIncrement = new QAction(this);
+    sizeSpinBox->addAction(autoIncrement);
+    autoIncrement->setShortcut(Qt::Key_BracketRight);
+    connect(autoIncrement, SIGNAL(triggered()),sizeSpinBox,SLOT(stepUp()));
+    autoIncrement = new QAction(this);
+    sizeSpinBox->addAction(autoIncrement);
+    autoIncrement->setShortcut(Qt::Key_BracketLeft);
+    connect(autoIncrement, SIGNAL(triggered()),sizeSpinBox,SLOT(stepDown())) ;
     this->addWidget(new QLabel("size: ",this));
     this->addWidget(sizeSpinBox);
     connect(sizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
@@ -116,7 +126,7 @@ BrushToolFunction::BrushToolFunction(QWidget *parent)
 }
 
 
-//+++++++++++ERASE+TOOL+++++++++++++++++++++++++++++++++++++++
+//+++++++++++Erase+Tool+++++++++++++++++++++++++++++++++++++++
 int EraseToolBase::eraseSize=10;
 int EraseToolBase::eraseShape;
 
@@ -137,7 +147,7 @@ EraseToolFunction::EraseToolFunction(QWidget *parent)
     ;
 }
 
-//+++++++++++Marquee+TOOL+++++++++++++++++++++++++++++++++++++++
+//+++++++++++Marquee+Tool+++++++++++++++++++++++++++++++++++++++
 int MarqueeToolBase::selectionType;
 
 MarqueeToolTweak::MarqueeToolTweak(QWidget *parent)
@@ -156,3 +166,29 @@ MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
 {
     ;
 }
+
+
+//+++++++++++Color+Swatch+++++++++++++++++++++++++++++++++++++++
+//int ColorSwatchBase::colorBoxWidth=10;
+
+//ColorSwatchTweak::ColorSwatchTweak(QWidget *parent)
+//    :ToolTweak("MARQUEE TOOL", parent)
+//{
+//    QFrame *colorSwatchFrame = new QFrame(this);
+//    for(int i=0; i<50; i++)
+//    {
+//        QPixmap *colorBox = new QPixmap(colorBoxWidth, colorBoxWidth);
+//        colorBox->fill(QColor(i*5,i*5,i*5));
+//        colorSwatchFrame
+//    }
+
+
+
+//    connect(selectionTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectionType(int)));
+//}
+
+//ColorSwatchFunction::ColorSwatchFunction(QWidget *parent)
+//    :QObject(parent)
+//{
+//    ;
+//}

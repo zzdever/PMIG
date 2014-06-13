@@ -6,6 +6,7 @@
 #include <QList>
 #include <QPoint>
 #include <QVector>
+#include <QColor>
 #include <QDebug>
 
 #include <cv.h>
@@ -35,6 +36,8 @@ public:
     CvPoint vertexA, vertexB;  // ellipse selection also uses this
     QVector<CvPoint> irregularSelectionPoints;
     long int irregularSelectionPointNum;
+
+    QColor fgColor, bgColor;
 
     void setToolType(ToolType::toolType toolType);
 

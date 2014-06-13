@@ -39,6 +39,8 @@ public:
     ~ToolBox();
 };
 
+
+
 class ToolTweak:public QToolBar
 {
     Q_OBJECT
@@ -157,5 +159,49 @@ public:
     int getSelectionType() const {return selectionType;}
 
 };
+
+
+
+
+
+
+
+//+++++++++++++Color+Swatch+++++++++++++++++++++++++++++++++++++
+//class ColorSwatchBase
+//{
+//protected:
+//    static const int colorBoxWidth;
+//};
+
+
+//class ColorSwatchTweak
+//        :public ToolTweak,
+//        protected ColorSwatchBase
+//{
+//    Q_OBJECT
+//public:
+//    ColorSwatchTweak(QWidget *parent);
+
+//private slots:
+//    void setSelectionType(int value){selectionType=value; qDebug()<<value;}
+
+//};
+
+//class ColorSwatchFunction
+//        :public QObject,
+//        protected ColorSwatchBase
+//{
+//    Q_OBJECT
+//public:
+//    ColorSwatchFunction(QWidget *parent);
+
+//    int getSelectionType() const {return selectionType;}
+
+//};
+
+
+
+
+
 
 #endif // TOOLBOX_H
