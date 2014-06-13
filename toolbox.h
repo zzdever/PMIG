@@ -122,4 +122,38 @@ public:
 
 };
 
+
+//+++++++++++++Marquee+Tool+++++++++++++++++++++++++++++++++++++
+class MarqueeToolBase
+{
+protected:
+    static int selectionType;
+};
+
+
+class MarqueeToolTweak
+        :public ToolTweak,
+        protected MarqueeToolBase
+{
+    Q_OBJECT
+public:
+    MarqueeToolTweak(QWidget *parent);
+
+private slots:
+    void setSelectionType(int value){selectionType=value; qDebug()<<value;}
+
+};
+
+class MarqueeToolFunction
+        :public QObject,
+        protected MarqueeToolBase
+{
+    Q_OBJECT
+public:
+    MarqueeToolFunction(QWidget *parent);
+
+    int getSelectionType() const {return selectionType;}
+
+};
+
 #endif // TOOLBOX_H

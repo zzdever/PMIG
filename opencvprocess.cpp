@@ -64,6 +64,10 @@ void OpencvProcess::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 {
 
     int lineType = CV_AA; // change it to 8 to see non-antialiased graphics
+    if(brushToolFunction->getAntiAliasing())
+        lineType = CV_AA;
+    else
+        lineType = 8;
     //Mat image = Mat::zeros(height, width, CV_8UC3);
     //Mat image(imageStack[currentImageNum]);
 

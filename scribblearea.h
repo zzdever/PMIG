@@ -12,6 +12,8 @@
 
 #include "toolbox.h"
 #include "opencvprocess.h"
+#include "shared/hoverpoints.h"
+
 
 //! [0]
 class ScribbleArea : public QWidget
@@ -55,6 +57,9 @@ private:
     QPoint imageCentralPoint;
 
     ToolType::toolType toolType;
+    const int toolIndicationAlpha;
+    QPolygonF marqueeHandlerControl;
+    HoverPoints *marqueeHandler;
 
 
     QImage CVMatToQImage(const Mat& imgMat);

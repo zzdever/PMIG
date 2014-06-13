@@ -83,6 +83,7 @@ void MainWindow::setupToolBar()
 
     toolsToolBar.insert(ToolType::Brush, new BrushToolTweak(this));
     toolsToolBar.insert(ToolType::Erase, new EraseToolTweak(this));
+    toolsToolBar.insert(ToolType::Marquee, new MarqueeToolTweak(this));
     foreach (ToolType::toolType tmp, toolsToolBar.keys()) {
         addToolBar(toolsToolBar[tmp]);
     }

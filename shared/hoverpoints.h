@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
 ** Contact: http://www.qt-project.org/legal
@@ -74,6 +74,11 @@ public:
         CurveConnection
     };
 
+    enum CloseType{
+        NoClose,
+        Close
+    };
+
     HoverPoints(QWidget *widget, PointShape shape);
 
     bool eventFilter(QObject *object, QEvent *event);
@@ -94,6 +99,9 @@ public:
 
     ConnectionType connectionType() const { return m_connectionType; }
     void setConnectionType(ConnectionType connectionType) { m_connectionType = connectionType; }
+
+    CloseType closeType() const { return m_closeType; }
+    void setCloseType(CloseType closeType) { m_closeType = closeType; }
 
     void setConnectionPen(const QPen &pen) { m_connectionPen = pen; }
     void setShapePen(const QPen &pen) { m_pointPen = pen; }
@@ -125,6 +133,7 @@ private:
     PointShape m_shape;
     SortType m_sortType;
     ConnectionType m_connectionType;
+    CloseType m_closeType;
 
     QVector<uint> m_locks;
 

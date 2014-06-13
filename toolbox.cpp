@@ -1,6 +1,7 @@
 ﻿#include <QSpinBox>
 #include <QLabel>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDebug>
 
 #include "toolbox.h"
@@ -130,6 +131,26 @@ EraseToolTweak::EraseToolTweak(QWidget *parent)
 }
 
 EraseToolFunction::EraseToolFunction(QWidget *parent)
+    :QObject(parent)
+{
+    ;
+}
+
+//+++++++++++Marquee+TOOL+++++++++++++++++++++++++++++++++++++++
+int MarqueeToolBase::selectionType;
+
+MarqueeToolTweak::MarqueeToolTweak(QWidget *parent)
+    :ToolTweak("MARQUEE TOOL", parent)
+{
+    QComboBox *selectionTypeBox = new QComboBox(this);
+    selectionTypeBox->addItem("Rectangle");
+    //selectionTypeBox->addItem("Circle");
+    this->addWidget(selectionTypeBox);
+
+    connect(selectionTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectionType(int)));
+}
+
+MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
     :QObject(parent)
 {
     ;

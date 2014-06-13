@@ -7,8 +7,6 @@
 
 #include "scribblearea.h"
 
-
-
 //! [11]
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
 //! [11] //! [12]
@@ -25,6 +23,13 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
         case ToolType::Marquee:
             opencvProcess->vertexA.x=eventX;
             opencvProcess->vertexA.y=eventY;
+
+            marqueeHandlerControl.clear();
+            marqueeHandlerControl << QPointF(event->pos().x(), event->pos().y())
+                       << QPointF(event->pos().x(), event->pos().y())
+                       << QPointF(event->pos().x(), event->pos().y())
+                       << QPointF(event->pos().x(), event->pos().y());
+
             break;
         default: break;
         }
@@ -50,6 +55,15 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
             opencvProcess->vertexB.x=eventX;
             opencvProcess->vertexB.y=eventY;
 
+            QPointF tmpOriginPoint(marqueeHandlerControl.at(0));
+            marqueeHandlerControl.clear();
+            marqueeHandlerControl << tmpOriginPoint
+                       << QPointF(event->pos().x(), tmpOriginPoint.ry())
+                       << QPointF(event->pos().x(), event->pos().y())
+                       << QPointF(tmpOriginPoint.rx(), event->pos().y());
+            marqueeHandler->setPoints(marqueeHandlerControl);
+
+            update();
             break;
         }
 
@@ -78,6 +92,15 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
         {
         case ToolType::Marquee:
             opencvProcess->somethingSelected=true;
+
+            QPointF tmpOriginPoint(marqueeHandlerControl.at(0));
+            marqueeHandlerControl.clear();
+            marqueeHandlerControl << tmpOriginPoint
+                       << QPointF(event->pos().x(), tmpOriginPoint.ry())
+                       << QPointF(event->pos().x(), event->pos().y())
+                       << QPointF(tmpOriginPoint.rx(), event->pos().y());
+            marqueeHandler->setPoints(marqueeHandlerControl);
+            update();
             break;
         }
 
@@ -91,6 +114,9 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
         {
         case ToolType::Marquee:
             opencvProcess->somethingSelected=false;
+            marqueeHandlerControl.clear();
+            marqueeHandler->setPoints(marqueeHandlerControl);
+            update();
             break;
         }
 
@@ -178,7 +204,8 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
 //! [0]
 ScribbleArea::ScribbleArea(QWidget *parent)
     : QWidget(parent),
-      opencvProcess(new OpencvProcess(this))
+      opencvProcess(new OpencvProcess(this)),
+      toolIndicationAlpha(150)
 {
     setAttribute(Qt::WA_StaticContents);
     modified = false;
@@ -192,6 +219,18 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 
     imageCentralPoint.setX(this->width()/2);
     imageCentralPoint.setY(this->height()/2);
+
+    marqueeHandler = new HoverPoints(this, HoverPoints::RectangleShape);
+    marqueeHandler->setConnectionType(HoverPoints::LineConnection);
+    marqueeHandler->setCloseType(HoverPoints::Close);
+    marqueeHandler->setEditable(false);
+    marqueeHandler->setPointSize(QSize(10, 10));
+    marqueeHandler->setShapeBrush(QBrush(QColor(0, 0, 0, toolIndicationAlpha)));
+    marqueeHandler->setShapePen(QPen(QColor(0, 0, 0, toolIndicationAlpha)));
+    marqueeHandler->setConnectionPen(QPen(QColor(0, 0, 0, toolIndicationAlpha)));
+    //marqueeHandler->setBoundingRect(QRectF(0, 0, 500, 500));
+    //            connect(pts, SIGNAL(pointsChanged(QPolygonF)),
+    //                    this, SLOT(updateCtrlPoints(QPolygonF)));
 
 }
 //! [0]

@@ -57,6 +57,7 @@ HoverPoints::HoverPoints(QWidget *widget, PointShape shape)
     widget->setAttribute(Qt::WA_AcceptTouchEvents);
 
     m_connectionType = CurveConnection;
+    m_closeType = NoClose;
     m_sortType = NoSort;
     m_shape = shape;
     m_pointPen = QPen(QColor(255, 255, 255, 191), 1);
@@ -306,9 +307,12 @@ void HoverPoints::paintPoints()
                              p2.x(), p2.y());
             }
             p.drawPath(path);
-        } else {
-            p.drawPolyline(m_points);
-        }
+        } else {       
+            if(m_closeType == Close)
+                p.drawPolygon(m_points);
+            else
+                p.drawPolyline(m_points);
+        }        
     }
 
     p.setPen(m_pointPen);
