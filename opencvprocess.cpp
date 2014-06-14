@@ -3,22 +3,23 @@
 #include <QPainter>
 #include <QBitmap>
 
-#include "opencvprocess.h"
+//#include "opencvprocess.h"
+#include "scribblearea.h"
 
-OpencvProcess::OpencvProcess(QWidget *parent)
-    :QWidget(parent)
-{
-    currentImageNum=-1;
-    toolType=ToolType::Brush;
-    somethingSelected=false;
+//OpencvProcess::OpencvProcess(QWidget *parent)
+//    :QWidget(parent)
+//{
+//    currentImageNum=-1;
+//    toolType=ToolType::Brush;
+//    somethingSelected=false;
 
-    brushToolFunction = new BrushToolFunction(this);
-    eraseToolFunction = new EraseToolFunction(this);
+//    brushToolFunction = new BrushToolFunction(this);
+//    eraseToolFunction = new EraseToolFunction(this);
 
-}
+//}
 
-bool OpencvProcess::openImage(const char*fileName)
-{
+//bool ScribbleArea::openImage(const char*fileName)
+//{
 //    Mat img = imread(fileName, CV_LOAD_IMAGE_COLOR);
 //    if(img.data)
 //    {
@@ -30,10 +31,39 @@ bool OpencvProcess::openImage(const char*fileName)
 //        qDebug()<<"Unable to load image "<<fileName;
 //        return false;
 //    }
-    IplImage *img = cvLoadImage(fileName);
+//    IplImage *img = cvLoadImage(fileName);
+//    if(img)
+//    {
+//        imageStack.append(img);
+//        return true;
+//    }
+//    else
+//    {
+//        qDebug()<<"Unable to load image "<<fileName;
+//        return false;
+//    }
+//}
+
+//! [1]
+bool ScribbleArea::openImage(const QString &fileName)
+//! [1] //! [2]
+{
+    if(totalImageNum == 1)
+    {
+        QMessageBox *tmpMessage = new QMessageBox(this);
+        tmpMessage->setText("Sorry, currently only one layer is supported,");
+        tmpMessage->show();
+        return false;
+    }
+
+    IplImage *img = cvLoadImage(&(fileName.toStdString()[0]));
     if(img)
     {
-        imageStack.append(img);
+        imageStackEdit.append(img);
+
+        totalImageNum++;
+        currentImageNum = totalImageNum-1;
+        updateDisplay(currentImageNum);
         return true;
     }
     else
@@ -41,42 +71,52 @@ bool OpencvProcess::openImage(const char*fileName)
         qDebug()<<"Unable to load image "<<fileName;
         return false;
     }
-}
 
-bool OpencvProcess::saveImage(const char *fileName, const char *fileFormat)
+
+
+//    QSize newSize = loadedImage.size().expandedTo(size());
+//    resizeImage(&loadedImage, newSize);
+//    image = loadedImage;
+//    modified = false;
+//    update();
+//    return true;
+}
+//! [2]
+
+//! [3]
+//bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
+//! [3] //! [4]
+//{
+//    QImage visibleImage = image;
+//    resizeImage(&visibleImage, size());
+//return true;
+    //if(saveImage(&(fileName.toStdString()[0]), fileFormat)){
+//    if (visibleImage.save(fileName, fileFormat)) {
+//        modified = false;
+//        return true;
+//    } else {
+//        return false;
+//    }
+//}
+//! [4]
+
+bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
     return true;
 }
 
-void OpencvProcess::updateCursor()
-{
-    switch(toolType)
-    {
-    case ToolType::Marquee:
-        parentWidget()->setCursor(QCursor(Qt::CrossCursor));
-        break;
-    case ToolType::Erase:
-    {
-        QPixmap cursorPixmap(eraseToolFunction->getEraseSize(), eraseToolFunction->getEraseSize());
-        cursorPixmap.fill(Qt::white);
-        parentWidget()->setCursor(QCursor(cursorPixmap));
-    }
-        break;
-    default:
-        parentWidget()->setCursor(QCursor(Qt::ArrowCursor));
-        break;
-    }
-}
 
-void OpencvProcess::setToolType(ToolType::toolType toolType)
-{
-    this->toolType = toolType;
-}
 
-void OpencvProcess::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
+//void ScribbleArea::setToolType(ToolType::toolType toolType)
+//{
+//    this->toolType = toolType;
+//}
+
+void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
 {
     switch (toolType) {
     case ToolType::Brush:
+    case ToolType::Erase:
         drawLineTo(lastPoint, currentPoint);
         break;
     default:
@@ -84,17 +124,18 @@ void OpencvProcess::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
     }
 
     //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
-    emit updateDisplay(currentImageNum);
+    //emit
+    updateDisplay(currentImageNum);
 }
 
-void OpencvProcess::ApplyToolFunction(QPoint currentPoint)
+void ScribbleArea::ApplyToolFunction(QPoint currentPoint)
 {
     switch(toolType){
     case ToolType::Erase:
-        vertexA.x=currentPoint.rx() - eraseToolFunction->getEraseSize()/2;
-        vertexA.y=currentPoint.ry() - eraseToolFunction->getEraseSize()/2;
-        vertexB.x=vertexA.x + eraseToolFunction->getEraseSize();
-        vertexB.y=vertexA.y + eraseToolFunction->getEraseSize();
+        vertexLeftTop.x=currentPoint.rx() - eraseToolFunction->getEraseSize()/2;
+        vertexLeftTop.y=currentPoint.ry() - eraseToolFunction->getEraseSize()/2;
+        vertexRightBottom.x=vertexLeftTop.x + eraseToolFunction->getEraseSize();
+        vertexRightBottom.y=vertexLeftTop.y + eraseToolFunction->getEraseSize();
         ApplyToolFunction();
         break;
     default:
@@ -102,43 +143,68 @@ void OpencvProcess::ApplyToolFunction(QPoint currentPoint)
     }
 
     //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
-    emit updateDisplay(currentImageNum);
+    //emit
+    updateDisplay(currentImageNum);
 }
 
-void OpencvProcess::ApplyToolFunction()
+void ScribbleArea::ApplyToolFunction()
 {
     switch (toolType) {
     case ToolType::Erase:
-        cvRectangle(imageStack[currentImageNum], vertexA, vertexB, CV_RGB(255,255,255), -1);
+        cvRectangle(imageStackEdit[currentImageNum], vertexLeftTop, vertexRightBottom, CV_RGB(255,255,255), -1);
         break;
     default:
         break;
     }
 
-    emit updateDisplay(currentImageNum);
+    //emit
+    updateDisplay(currentImageNum);
 }
 
-void OpencvProcess::drawLineTo(QPoint lastPoint, QPoint currentPoint)
+void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 {
-
-    int lineType = CV_AA; // change it to 8 to see non-antialiased graphics
-    if(brushToolFunction->getAntiAliasing())
-        lineType = CV_AA;
-    else
-        lineType = 8;
     //Mat image = Mat::zeros(height, width, CV_8UC3);
     //Mat image(imageStack[currentImageNum]);
 
-    Point pt1, pt2;
+    cv::Point pt1, pt2;
 
     pt1.x=lastPoint.x();
     pt1.y=lastPoint.y();
     pt2.x=currentPoint.x();
     pt2.y=currentPoint.y();
 
-    //line( image, pt1, pt2,  Scalar(icolor&255, (icolor>>8)&255, (icolor>>16)&255), rng.uniform(1,10), lineType );
-    cvLine(imageStack[currentImageNum], pt1, pt2, cvScalar(100,50,50,50), brushToolFunction->getBrushSize(), lineType);
+    QColor color;
+    int size;
+    int lineType; // change it to 8 to see non-antialiased graphics
+    switch(toolType)
+    {
+    case ToolType::Brush:{
+        color=fgColor;
+        size=brushToolFunction->getBrushSize();
+        if(brushToolFunction->getAntiAliasing())
+            lineType = CV_AA;
+        else
+            lineType = 8;
+        break;
+    }
+    case ToolType::Erase:{
+        color=bgColor;
+        size=eraseToolFunction->getEraseSize();
+        lineType = CV_AA;
+        break;
+    }
+    default:{
+        color=fgColor;
+        size=5;
+        break;
+    }
+    }
 
+
+    //line( image, pt1, pt2,  Scalar(icolor&255, (icolor>>8)&255, (icolor>>16)&255), rng.uniform(1,10), lineType );
+    cvLine(imageStackEdit[currentImageNum], pt1, pt2,
+           cvScalar(color.blue(),color.green(), color.red(), color.alpha()), size, lineType);
+    /// cvScalar(b, g, r, a);
     return;
 }
 

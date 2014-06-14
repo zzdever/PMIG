@@ -7,22 +7,20 @@
 
 #include "scribblearea.h"
 
-//! [11]
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
-//! [11] //! [12]
 {
     if(totalImageNum <= 0) return;
     if (event->button() == Qt::LeftButton) {
         isMousePressed = true;
 
-        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
         switch(toolType)
         {
         case ToolType::Marquee:
-            opencvProcess->vertexA.x=eventX;
-            opencvProcess->vertexA.y=eventY;
+            vertexLeftTop.x=eventX;
+            vertexLeftTop.y=eventY;
 
             marqueeHandlerControl.clear();
             marqueeHandlerControl << QPointF(event->pos().x(), event->pos().y())
@@ -44,18 +42,19 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
     if ((event->buttons() & Qt::LeftButton) && isMousePressed){
         isMouseMoving = true;
 
-        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
-        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
         switch(toolType)
         {
         case ToolType::Brush:
+        case ToolType::Erase:
             break;
         case ToolType::Marquee:{
-            opencvProcess->vertexB.x=eventX;
-            opencvProcess->vertexB.y=eventY;
+            vertexRightBottom.x=eventX;
+            vertexRightBottom.y=eventY;
 
             QPointF tmpOriginPoint(marqueeHandlerControl.at(0));
             marqueeHandlerControl.clear();
@@ -68,15 +67,15 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
             update();
             break;
         }
-        case ToolType::Erase:
-            opencvProcess->ApplyToolFunction(QPoint(eventX,eventY));
-            break;
+//        case ToolType::Erase:
+//            ApplyToolFunction(QPoint(eventX,eventY));
+//            break;
 
         default:
             break;
         }
 
-        opencvProcess->ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
+        ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
         lastPoint = event->pos();
 
     }
@@ -90,17 +89,18 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton && isMouseMoving) {
         isMouseMoving = false;
 
-        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
-        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+        int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
         switch(toolType)
         {
         case ToolType::Brush:
+        case ToolType::Erase:
             break;
         case ToolType::Marquee:{
-            opencvProcess->somethingSelected=true;
+            somethingSelected=true;
 
             QPointF tmpOriginPoint(marqueeHandlerControl.at(0));
             marqueeHandlerControl.clear();
@@ -114,31 +114,32 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
         }
         }
 
-        opencvProcess->ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
+        ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
 
     }
     else {
-        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStack[currentImageNum].width()/2);
-        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStack[currentImageNum].height()/2);
+        int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+        int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
         switch(toolType)
         {
         case ToolType::Brush:
+        case ToolType::Erase:
             break;
         case ToolType::Marquee:
-            opencvProcess->somethingSelected=false;
+            somethingSelected=false;
             marqueeHandlerControl.clear();
             marqueeHandler->setPoints(marqueeHandlerControl);
             update();
             break;
-        case ToolType::Erase:
-            break;
+//        case ToolType::Erase:
+//            break;
 
         default:
             break;
         }
 
-        opencvProcess->ApplyToolFunction(QPoint(eventX,eventY));
+        ApplyToolFunction(QPoint(eventX,eventY));
     }
 }
 
@@ -148,26 +149,26 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
 
 void ScribbleArea::updateDisplay(int changedImageNum)
 {
-    if(changedImageNum > imageStack.size())
+    if(changedImageNum > imageStackDisplay.size())
     {
         qDebug()<<"Out of bound, no such image opened";
         return;
     }
 
-    if(changedImageNum == imageStack.size())
+    if(changedImageNum == imageStackDisplay.size())
     {
         QImage newImage;
         newImage = IplImage2QImage(
-                    opencvProcess->imageStack[changedImageNum], 0, 1000);
+                    imageStackEdit[changedImageNum], 0, 1000);
 //        newImage = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
-        imageStack.append(newImage);
+        imageStackDisplay.append(newImage);
 
         //resizeImage(&imageStack[0], QSize(imageStack[0].width()/2, imageStack[0].height()/2));
     }
     else
     {
-        imageStack[changedImageNum] = IplImage2QImage(
-                    opencvProcess->imageStack[changedImageNum], 0, 1000);
+        imageStackDisplay[changedImageNum] = IplImage2QImage(
+                    imageStackEdit[changedImageNum], 0, 1000);
 //        imageStack[changedImageNum] = CVMatToQImage(opencvProcess->imageStack[changedImageNum]);
         modified=true;
     }
@@ -184,13 +185,13 @@ void ScribbleArea::paintEvent(QPaintEvent *event)
 //    painter.drawImage(dirtyRect, image, dirtyRect);
 
     /// @note can be optimized, update one small area one time
-    if(imageStack.size()>0)
+    if(imageStackDisplay.size()>0)
     {
-        for(int i=0; i<imageStack.size(); i++)
+        for(int i=0; i<imageStackDisplay.size(); i++)
         {
-            painter.drawImage(imageCentralPoint.x()-imageStack[i].width()/2,
-                imageCentralPoint.y()-imageStack[i].height()/2,
-                imageStack[i]);
+            painter.drawImage(imageCentralPoint.x()-imageStackDisplay[i].width()/2,
+                imageCentralPoint.y()-imageStackDisplay[i].height()/2,
+                imageStackDisplay[i]);
         }
     }
 }
@@ -214,19 +215,41 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
 void ScribbleArea::keyPressEvent(QKeyEvent *event)
 {
     if(event->matches(QKeySequence::Delete))
-    {qDebug()<<opencvProcess->somethingSelected;
-        if(opencvProcess->somethingSelected == false) return;
+    {
+        if(somethingSelected == false) return;
 
-        opencvProcess->setToolType(ToolType::Erase);
-        opencvProcess->ApplyToolFunction();
-        opencvProcess->setToolType(toolType);
+        ToolType::toolType type=toolType;
+        toolType=ToolType::Erase;
+        ApplyToolFunction();
+        toolType=type;
     }
 }
 
 void ScribbleArea::enterEvent(QEvent * event)
 {
     if(totalImageNum>0 && event->type() == QEvent::Enter){
-        opencvProcess->updateCursor();
+        updateCursor();
+    }
+
+}
+
+void ScribbleArea::updateCursor()
+{
+    switch(toolType)
+    {
+    case ToolType::Marquee:
+        setCursor(QCursor(Qt::CrossCursor));
+        break;
+    case ToolType::Erase:
+    {
+        QPixmap cursorPixmap(eraseToolFunction->getEraseSize(), eraseToolFunction->getEraseSize());
+        cursorPixmap.fill(Qt::white);
+        setCursor(QCursor(cursorPixmap));
+    }
+        break;
+    default:
+        setCursor(QCursor(Qt::ArrowCursor));
+        break;
     }
 }
 
@@ -234,9 +257,8 @@ void ScribbleArea::enterEvent(QEvent * event)
 void ScribbleArea::setToolType(ToolType::toolType type)
 {
     toolType=type;
-    opencvProcess->setToolType(type);
 
-    if(totalImageNum>0) opencvProcess->updateCursor();
+    if(totalImageNum>0) updateCursor();
 
     return;
 }
@@ -247,7 +269,6 @@ void ScribbleArea::setToolType(ToolType::toolType type)
 //! [0]
 ScribbleArea::ScribbleArea(QWidget *parent)
     : QWidget(parent),
-      opencvProcess(new OpencvProcess(this)),
       toolIndicationAlpha(150)
 {
     setAttribute(Qt::WA_StaticContents);
@@ -255,10 +276,16 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     isMouseMoving = false;
     isMousePressed = false;
     toolType = ToolType::Brush;
+    somethingSelected=false;
+
+    brushToolFunction = new BrushToolFunction(this);
+    eraseToolFunction = new EraseToolFunction(this);
+    fgColor=Qt::black;
+    bgColor=Qt::white;
 
     totalImageNum = 0;
     currentImageNum = -1;
-    connect(opencvProcess, &OpencvProcess::updateDisplay, this, &ScribbleArea::updateDisplay);
+    //connect(opencvProcess, &OpencvProcess::updateDisplay, this, &ScribbleArea::updateDisplay);
 
     imageCentralPoint.setX(this->width()/2);
     imageCentralPoint.setY(this->height()/2);
@@ -280,69 +307,6 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 }
 //! [0]
 
-//! [1]
-bool ScribbleArea::openImage(const QString &fileName)
-//! [1] //! [2]
-{
-    if(totalImageNum == 1)
-    {
-        QMessageBox *tmpMessage = new QMessageBox(this);
-        tmpMessage->setText("Sorry, currently only one layer is supported,");
-        tmpMessage->show();
-        return false;
-    }
-
-    if(opencvProcess->openImage(&(fileName.toStdString()[0])))
-    {
-        totalImageNum++;
-        currentImageNum = totalImageNum-1;
-        opencvProcess->currentImageNum=currentImageNum;
-        updateDisplay(currentImageNum);
-        return true;
-    }
-    return false;
-
-//    QSize newSize = loadedImage.size().expandedTo(size());
-//    resizeImage(&loadedImage, newSize);
-//    image = loadedImage;
-//    modified = false;
-//    update();
-//    return true;
-}
-//! [2]
-
-//! [3]
-bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
-//! [3] //! [4]
-{
-//    QImage visibleImage = image;
-//    resizeImage(&visibleImage, size());
-
-    if(opencvProcess->saveImage(&(fileName.toStdString()[0]), fileFormat)){
-//    if (visibleImage.save(fileName, fileFormat)) {
-        modified = false;
-        return true;
-    } else {
-        return false;
-    }
-}
-//! [4]
-
-////! [5]
-//void ScribbleArea::setPenColor(const QColor &newColor)
-////! [5] //! [6]
-//{
-//    myPenColor = newColor;
-//}
-////! [6]
-
-////! [7]
-//void ScribbleArea::setPenWidth(int newWidth)
-////! [7] //! [8]
-//{
-//    myPenWidth = newWidth;
-//}
-////! [8]
 
 ////! [9]
 //void ScribbleArea::clearImage()
@@ -410,9 +374,9 @@ bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 //! [22]
 
 
-QImage ScribbleArea::CVMatToQImage(const Mat& imgMat)
+QImage ScribbleArea::CVMatToQImage(const cv::Mat& imgMat)
 {
-    Mat rgb;
+    cv::Mat rgb;
     cvtColor(imgMat, rgb, CV_BGR2RGB);
 
     return QImage((const unsigned char*)rgb.data, rgb.cols, rgb.rows, QImage::Format_RGB888);

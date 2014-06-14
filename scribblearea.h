@@ -23,37 +23,40 @@ class ScribbleArea : public QWidget
 public:
     ScribbleArea(QWidget *parent = 0);
 
-    bool openImage(const QString &fileName);
-    bool saveImage(const QString &fileName, const char *fileFormat);
-//    void setPenColor(const QColor &newColor);
-//    void setPenWidth(int newWidth);
-
     bool isModified() const { return modified; }
 
     void setToolType(ToolType::toolType type);
+    void setFgColor(QColor color) {fgColor=color;}
+    void setBgColor(QColor color) {bgColor=color;}
 
-//    QColor penColor() const { return myPenColor; }
-//    int penWidth() const { return myPenWidth; }
+    void ApplyToolFunction(QPoint lastPoint, QPoint currentPoint);
+    void ApplyToolFunction(QPoint currentPoint);
+    void ApplyToolFunction();
+
+    bool openImage(const QString &fileName);
+    bool saveImage(const QString &fileName, const char *fileFormat);
+    void drawLineTo(QPoint lastPoint, QPoint currentPoint);
+    void resizeImage(QImage *image, const QSize &newSize);
 
 public slots:
 //    void clearImage();
-    //void print();
+//    void print();
     void updateDisplay(int changedImageNum);
+    void updateCursor();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void enterEvent(QEvent * event);
-//    void mouseDoubleClickEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
+    //    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    OpencvProcess *opencvProcess;
     int totalImageNum, currentImageNum;
-    QList<QImage> imageStack;
+    QList<QImage> imageStackDisplay;
     QPoint imageCentralPoint;
 
     ToolType::toolType toolType;
@@ -61,24 +64,27 @@ private:
     QPolygonF marqueeHandlerControl;
     HoverPoints *marqueeHandler;
 
+    BrushToolFunction *brushToolFunction;
+    EraseToolFunction *eraseToolFunction;
 
-    QImage CVMatToQImage(const Mat& imgMat);
+    QList<IplImage*> imageStackEdit;
+//    QList<Mat> imageStack;
+    QImage CVMatToQImage(const cv::Mat& imgMat);
     QImage IplImage2QImage(const IplImage *iplImage, double mini, double maxi);
 
 
-    bool modified;
-    //bool scribbling;
-    //int myPenWidth;
-    //QColor myPenColor;
-    //QImage image;
     QPoint lastPoint;
+    CvPoint vertexLeftTop, vertexRightBottom;  // ellipse selection also uses this
+    QVector<CvPoint> irregularSelectionPoints;
+    long int irregularSelectionPointNum;
+    QColor fgColor, bgColor;
+
+    bool modified;
+    bool somethingSelected;
     bool isMouseMoving;
     bool isMousePressed;
 
-//    void drawLineTo(const QPoint &endPoint);
-    void resizeImage(QImage *image, const QSize &newSize);
 
 };
-//! [0]
 
 #endif

@@ -24,6 +24,7 @@
 #include <QtEvents>
 #include <QFrame>
 #include <QMainWindow>
+#include <QObject>
 #include <qdebug.h>
 
 
@@ -76,6 +77,30 @@ MainWindow::MainWindow(QWidget *parent)
 //{
 //    ;
 //}
+
+class ColorIconAction:public QAction
+{
+public:
+    static int actionNum;
+    int id;
+    ColorIconAction(const QIcon &icon, const QString &text, QObject *parent)
+        :QAction(icon, text, parent) {}
+
+public slots:
+    void updateColorIcon(int id, QColor color);
+
+};
+
+int ColorIconAction::actionNum;
+
+void ColorIconAction::updateColorIcon(int id, QColor color)
+{
+    if(id!=this->id) return;
+
+    QPixmap icon(25,25);
+    icon.fill(color);
+    this->setIcon(icon);
+}
 
 void MainWindow::setupToolBar()
 {
@@ -139,7 +164,61 @@ void MainWindow::setupToolBar()
     toolBox->addAction(penAct);
     toolBox->addAction(eraseAct);
 
+    toolBox->addSeparator();
+
+    QSignalMapper *signalMapper = new QSignalMapper(this);
+
+    QPixmap fgColorIcon(25,25);
+    fgColorIcon.fill(QColor(Qt::black));
+    ColorIconAction* fgColorAct=new ColorIconAction(QIcon(fgColorIcon), tr("Frontground Color"), this);
+    fgColorAct->id=fgColorAct->actionNum++;
+    fgColorAct->setStatusTip(tr("To change the frontground color"));
+    connect(fgColorAct, SIGNAL(triggered()), signalMapper, SLOT(map()));
+    signalMapper->setMapping(fgColorAct,fgColorAct->id);
+    //connect(fgColorAct, SIGNAL(triggered()), this, SLOT(setFgColor()));
+    connect(this, &MainWindow::updateColorIcon, fgColorAct, &ColorIconAction::updateColorIcon);
+    toolBox->addAction(fgColorAct);
+
+    QPixmap bgColorIcon(25,25);
+    bgColorIcon.fill(QColor(Qt::white));
+    ColorIconAction* bgColorAct=new ColorIconAction(QIcon(bgColorIcon), tr("Background Color"), this);
+    bgColorAct->id=bgColorAct->actionNum++;
+    bgColorAct->setStatusTip(tr("To change the background color"));
+    connect(bgColorAct, SIGNAL(triggered()), signalMapper, SLOT(map()));
+    signalMapper->setMapping(bgColorAct,bgColorAct->id);
+//    connect(fgColorAct, SIGNAL(triggered()), this, SLOT(setBgColor()));
+    connect(this, &MainWindow::updateColorIcon, bgColorAct, &ColorIconAction::updateColorIcon);
+    toolBox->addAction(bgColorAct);
+
+    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(setColor(int)));
+
 }
+
+void MainWindow::setColor(int id)
+{
+    QColorDialog dialog(this);
+    dialog.exec();
+    //if(dialog.) return;
+    QColor color=dialog.selectedColor();
+    if(id==0)
+        centerScribbleArea->setFgColor(color);
+    if(id==1)
+        centerScribbleArea->setBgColor(color);
+
+    emit updateColorIcon(id, color);
+    //update();
+}
+
+//void MainWindow::setBgColor()
+//{
+//    QColorDialog dialog(this);
+//    dialog.exec();
+//    //if(dialog.) return;
+//    QColor color=dialog.selectedColor();
+//    centerScribbleArea->setBgColor(color);
+//    emit updateBgColorIcon();
+//    //update();
+//}
 
 void MainWindow::switchToolsToolBar(ToolType::toolType newToolType)
 {

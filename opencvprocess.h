@@ -1,4 +1,5 @@
-﻿#ifndef OPENCVPROCESS_H
+﻿#if 0
+#ifndef OPENCVPROCESS_H
 #define OPENCVPROCESS_H
 
 #include <QObject>
@@ -40,7 +41,6 @@ public:
 
     void drawLineTo(QPoint lastPoint, QPoint currentPoint);
 
-    //IplImage* toolIndicationImage;
     QList<IplImage*> imageStack;
 //    QList<Mat> imageStack;
 
@@ -61,3 +61,5 @@ signals:
 };
 
 #endif // OPENCVPROCESS_H
+
+#endif

@@ -91,9 +91,12 @@ private slots:
     void setToolErase(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Erase);
     }
+    void setColor(int);
+    //void setBgColor(void);
 
 signals:
-
+    void updateColorIcon(int, QColor);
+    //void updateBgColorIcon();
 };
 
 
