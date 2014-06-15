@@ -12,5 +12,6 @@
         <file>images/eraser-tool.png</file>
         <file>images/pen-tool.png</file>
         <file>images/transform-tool.png</file>
+        <file>images/lasso-tool.png</file>
     </qresource>
 </RCC>

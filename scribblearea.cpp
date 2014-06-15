@@ -18,15 +18,33 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
 
         switch(toolType)
         {
-        case ToolType::Marquee:{
-            vertexLeftTop.x=eventX;
-            vertexLeftTop.y=eventY;
-
+        case ToolType::Marquee:
+        case ToolType::Lasso:{
+            somethingSelected=false;
             marqueeHandlerControl.clear();
-            marqueeHandlerControl << QPointF(event->pos().x(), event->pos().y())
-                       << QPointF(event->pos().x(), event->pos().y())
-                       << QPointF(event->pos().x(), event->pos().y())
-                       << QPointF(event->pos().x(), event->pos().y());
+            marqueeHandler->setPoints(marqueeHandlerControl);
+            lassoHandlerControl.clear();
+            lassoHandler->setPoints(lassoHandlerControl);
+
+            switch(toolType){
+            case ToolType::Marquee:
+                vertexLeftTop.x=eventX;
+                vertexLeftTop.y=eventY;
+                marqueeHandlerControl << QPointF(event->pos().x(), event->pos().y())
+                           << QPointF(event->pos().x(), event->pos().y())
+                           << QPointF(event->pos().x(), event->pos().y())
+                           << QPointF(event->pos().x(), event->pos().y());
+                break;
+            case ToolType::Lasso:
+                irregularSelectionPoints.append({eventX, eventY});
+                irregularSelectionPointNum++;
+                lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
+                lassoHandler->setPoints(lassoHandlerControl);
+                break;
+            default:break;
+            }
+
+
 
             break;
         }
@@ -70,6 +88,12 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
 
             update();
             break;
+        }
+        case ToolType::Lasso:{
+            irregularSelectionPoints.append({eventX, eventY});
+            irregularSelectionPointNum++;
+            lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
+            lassoHandler->setPoints(lassoHandlerControl);
         }
 //        case ToolType::Erase:
 //            ApplyToolFunction(QPoint(eventX,eventY));
@@ -117,6 +141,16 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             update();
             break;
         }
+        case ToolType::Lasso:{
+            irregularSelectionPoints.append({eventX, eventY});
+            irregularSelectionPointNum++;
+            lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
+            lassoHandler->setPoints(lassoHandlerControl);
+            lassoHandler->setCloseType(HoverPoints::Close);
+            somethingSelected=true;
+        }
+        default:
+            break;
         }
 
         ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
@@ -135,6 +169,13 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             somethingSelected=false;
             marqueeHandlerControl.clear();
             marqueeHandler->setPoints(marqueeHandlerControl);
+            update();
+            break;
+        }
+        case ToolType::Lasso:{
+            somethingSelected=false;
+            lassoHandlerControl.clear();
+            lassoHandler->setPoints(lassoHandlerControl);
             update();
             break;
         }
@@ -223,11 +264,7 @@ void ScribbleArea::keyPressEvent(QKeyEvent *event)
     if(event->matches(QKeySequence::Delete))
     {
         if(somethingSelected == false) return;
-
-        ToolType::toolType type=toolType;
-        toolType=ToolType::Erase;
-        ApplyToolFunction();
-        toolType=type;
+        deleteSelectedArea();
     }
 
     if(event->matches(QKeySequence::SelectAll))
@@ -303,6 +340,8 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     isMousePressed = false;
     toolType = ToolType::Brush;
     somethingSelected=false;
+    irregularSelectionPoints.clear();
+    irregularSelectionPointNum=0;
 
     brushToolFunction = new BrushToolFunction(this);
     eraseToolFunction = new EraseToolFunction(this);
@@ -327,13 +366,21 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     //marqueeHandler->setBoundingRect(QRectF(0, 0, 500, 500));
     connect(marqueeHandler, SIGNAL(pointsChanged(QPolygonF)),this, SLOT(updateMarqueeHandlerControlPoints(QPolygonF)));
 
+    lassoHandler = new HoverPoints(this, HoverPoints::CircleShape);
+    lassoHandler->setConnectionType(HoverPoints::LineConnection);
+    lassoHandler->setCloseType(HoverPoints::NoClose);
+    lassoHandler->setEditable(false);
+    lassoHandler->setPointSize(QSize(1, 1));
+    lassoHandler->setShapeBrush(QBrush(QColor(0, 0, 0, 255)));
+    lassoHandler->setShapePen(QPen(QColor(0, 0, 0, 255)));
+    lassoHandler->setConnectionPen(QPen(QColor(0, 0, 0, 255)));
     //setMouseTracking(true);
 
 }
 //! [0]
 
 void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
-{
+{return;
     if(newControlPoints.size()<4) return;
     QPointF trans;
 

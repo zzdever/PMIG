@@ -150,9 +150,7 @@ void ScribbleArea::ApplyToolFunction(QPoint currentPoint)
 void ScribbleArea::ApplyToolFunction()
 {
     switch (toolType) {
-    case ToolType::Erase:
-        cvRectangle(imageStackEdit[currentImageNum], vertexLeftTop, vertexRightBottom, CV_RGB(255,255,255), -1);
-        break;
+
     default:
         break;
     }
@@ -208,4 +206,21 @@ void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
     return;
 }
 
+void ScribbleArea::deleteSelectedArea()
+{
+    switch (toolType){
+    case ToolType::Marquee:
+        if(somethingSelected == false) {return;}
+        cvRectangle(imageStackEdit[currentImageNum], vertexLeftTop, vertexRightBottom, CV_RGB(255,255,255), -1);
+        break;
+    case ToolType::Lasso:
+        foreach(CvPoint tmp, irregularSelectionPoints){
+            qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+        }
+
+        break;
+    }
+
+    emit updateDisplay(currentImageNum);
+}
 

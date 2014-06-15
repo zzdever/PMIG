@@ -15,7 +15,8 @@ public:
         Erase=1,
         Marquee=2,
         Pen=3,
-        Transform=4
+        Transform=4,
+        Lasso=5
     };
 };
 
@@ -143,7 +144,7 @@ public:
     MarqueeToolTweak(QWidget *parent);
 
 private slots:
-    void setSelectionType(int value){selectionType=value; qDebug()<<value;}
+    void setSelectionType(int value){selectionType=value;}
 
 };
 
@@ -176,7 +177,7 @@ public:
     TransformToolTweak(QWidget *parent);
 
 private slots:
-    //void setSelectionType(int value){selectionType=value; qDebug()<<value;}
+    //void setSelectionType(int value){selectionType=value;}
 
 };
 
@@ -189,6 +190,40 @@ public:
     TransformToolFunction(QWidget *parent);
 
     //int getSelectionType() const {return selectionType;}
+
+};
+
+
+//+++++++++++++Lasso+Tool+++++++++++++++++++++++++++++++++++++
+class LassoToolBase
+{
+protected:
+    static bool magnetic;
+};
+
+
+class LassoToolTweak
+        :public ToolTweak,
+        protected LassoToolBase
+{
+    Q_OBJECT
+public:
+    LassoToolTweak(QWidget *parent);
+
+private slots:
+    void setMagnetic(bool value){magnetic=value;}
+
+};
+
+class LassoToolFunction
+        :public QObject,
+        protected LassoToolBase
+{
+    Q_OBJECT
+public:
+    LassoToolFunction(QWidget *parent);
+
+    bool getMagnetic() const {return magnetic;}
 
 };
 

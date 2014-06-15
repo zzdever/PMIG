@@ -110,6 +110,7 @@ void MainWindow::setupToolBar()
     toolsToolBar.insert(ToolType::Erase, new EraseToolTweak(this));
     toolsToolBar.insert(ToolType::Marquee, new MarqueeToolTweak(this));
     toolsToolBar.insert(ToolType::Transform, new TransformToolTweak(this));
+    toolsToolBar.insert(ToolType::Lasso, new LassoToolTweak(this));
     foreach (ToolType::toolType tmp, toolsToolBar.keys()) {
         addToolBar(toolsToolBar[tmp]);
     }
@@ -150,11 +151,18 @@ void MainWindow::setupToolBar()
     transformAct->setCheckable(true);
     connect(transformAct,SIGNAL(toggled(bool)),this,SLOT(setToolTransform(bool)));
 
+    QAction *lassoAct = new QAction(QIcon(":images/lasso-tool.png"),tr("&Lasso tool (L)"),this);
+    lassoAct->setShortcut(Qt::Key_L);
+    lassoAct->setStatusTip(tr("To select an irregular area"));
+    lassoAct->setCheckable(true);
+    connect(lassoAct,SIGNAL(toggled(bool)),this,SLOT(setToolLasso(bool)));
+
     toolBoxGroup->addAction(marqueeAct);
     toolBoxGroup->addAction(brushAct);
     toolBoxGroup->addAction(penAct);
     toolBoxGroup->addAction(eraseAct);
     toolBoxGroup->addAction(transformAct);
+    toolBoxGroup->addAction(lassoAct);
 
 
     toolBox = addToolBar(tr("Tool box"));
@@ -172,6 +180,7 @@ void MainWindow::setupToolBar()
     toolBox->addAction(penAct);
     toolBox->addAction(eraseAct);
     toolBox->addAction(transformAct);
+    toolBox->addAction(lassoAct);
 
     toolBox->addSeparator();
 

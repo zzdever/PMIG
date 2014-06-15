@@ -170,3 +170,22 @@ TransformToolFunction::TransformToolFunction(QWidget *parent)
 {
     ;
 }
+
+
+//+++++++++++Transform+TOOL+++++++++++++++++++++++++++++++++++++++
+bool LassoToolBase::magnetic=false;
+
+LassoToolTweak::LassoToolTweak(QWidget *parent)
+    :ToolTweak("LASSO TOOL", parent)
+{
+    QCheckBox *magneticCheckBox = new QCheckBox(this);
+    magneticCheckBox->setText("Magnetic");
+    this->addWidget(magneticCheckBox);
+    connect(magneticCheckBox,SIGNAL(toggled(bool)),this, SLOT(setMagnetic(bool)));
+}
+
+LassoToolFunction::LassoToolFunction(QWidget *parent)
+    :QObject(parent)
+{
+    ;
+}

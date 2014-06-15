@@ -95,6 +95,9 @@ private slots:
     void setToolTransform(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Transform);
     }
+    void setToolLasso(bool toggle){
+        if(toggle) switchToolsToolBar(ToolType::Lasso);
+    }
 
     void setColor(int);
     //void setBgColor(void);

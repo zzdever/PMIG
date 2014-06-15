@@ -38,6 +38,8 @@ public:
     bool saveImage(const QString &fileName, const char *fileFormat);
     void drawLineTo(QPoint lastPoint, QPoint currentPoint);
     void resizeImage(QImage *image, const QSize &newSize);
+    void deleteSelectedArea(void);
+
 
 public slots:
 //    void clearImage();
@@ -64,6 +66,8 @@ private:
     const int toolIndicationAlpha;
     QPolygonF marqueeHandlerControl;
     HoverPoints *marqueeHandler;
+    QPolygonF lassoHandlerControl;
+    HoverPoints *lassoHandler;
     HoverPoints *anchorPoint;
 
     BrushToolFunction *brushToolFunction;
