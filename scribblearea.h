@@ -28,6 +28,7 @@ public:
     void setToolType(ToolType::toolType type);
     void setFgColor(QColor color) {fgColor=color;}
     void setBgColor(QColor color) {bgColor=color;}
+    void selectAll(void);
 
     void ApplyToolFunction(QPoint lastPoint, QPoint currentPoint);
     void ApplyToolFunction(QPoint currentPoint);
@@ -63,6 +64,7 @@ private:
     const int toolIndicationAlpha;
     QPolygonF marqueeHandlerControl;
     HoverPoints *marqueeHandler;
+    HoverPoints *anchorPoint;
 
     BrushToolFunction *brushToolFunction;
     EraseToolFunction *eraseToolFunction;
@@ -84,6 +86,8 @@ private:
     bool isMouseMoving;
     bool isMousePressed;
 
+private slots:
+    void updateMarqueeHandlerControlPoints(QPolygonF);
 
 };
 

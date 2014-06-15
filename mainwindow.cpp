@@ -109,6 +109,7 @@ void MainWindow::setupToolBar()
     toolsToolBar.insert(ToolType::Brush, new BrushToolTweak(this));
     toolsToolBar.insert(ToolType::Erase, new EraseToolTweak(this));
     toolsToolBar.insert(ToolType::Marquee, new MarqueeToolTweak(this));
+    toolsToolBar.insert(ToolType::Transform, new TransformToolTweak(this));
     foreach (ToolType::toolType tmp, toolsToolBar.keys()) {
         addToolBar(toolsToolBar[tmp]);
     }
@@ -118,7 +119,7 @@ void MainWindow::setupToolBar()
     QActionGroup *toolBoxGroup = new QActionGroup(this);
     toolBoxGroup->setExclusive(true);
 
-    QAction *marqueeAct = new QAction(QIcon(":images/marquee-square.png"),tr("&Marquee tool (M)"),this);\
+    QAction *marqueeAct = new QAction(QIcon(":images/marquee-square.png"),tr("&Marquee tool (M)"),this);
     marqueeAct->setShortcut(Qt::Key_M);
     marqueeAct->setStatusTip(tr("To select an area"));
     marqueeAct->setCheckable(true);
@@ -143,10 +144,17 @@ void MainWindow::setupToolBar()
     eraseAct->setCheckable(true);
     connect(eraseAct,SIGNAL(toggled(bool)),this,SLOT(setToolErase(bool)));
 
+    QAction *transformAct = new QAction(QIcon(":images/transform-tool.png"),tr("&Transform tool (T)"),this);
+    transformAct->setShortcut(Qt::Key_T);
+    transformAct->setStatusTip(tr("Freely transform the shape of an area"));
+    transformAct->setCheckable(true);
+    connect(transformAct,SIGNAL(toggled(bool)),this,SLOT(setToolTransform(bool)));
+
     toolBoxGroup->addAction(marqueeAct);
     toolBoxGroup->addAction(brushAct);
     toolBoxGroup->addAction(penAct);
     toolBoxGroup->addAction(eraseAct);
+    toolBoxGroup->addAction(transformAct);
 
 
     toolBox = addToolBar(tr("Tool box"));
@@ -163,6 +171,7 @@ void MainWindow::setupToolBar()
     toolBox->addAction(brushAct);
     toolBox->addAction(penAct);
     toolBox->addAction(eraseAct);
+    toolBox->addAction(transformAct);
 
     toolBox->addSeparator();
 
@@ -459,6 +468,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 //! [2]
 
+//void MainWindow::keyPressEvent(QKeyEvent *event)
+//{
+//    if(event->matches(QKeySequence::SelectAll))
+//        centerScribbleArea->selectAll();
+//}
+
 void MainWindow::openFile()
 {
     if (maybeSave()) {
@@ -499,7 +514,6 @@ void MainWindow::saveFile()
 }
 
 bool MainWindow::maybeSave()
-//! [17] //! [18]
 {
     if (centerScribbleArea->isModified()) {
        QMessageBox::StandardButton ret;

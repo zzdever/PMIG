@@ -14,7 +14,8 @@ public:
         Brush=0,
         Erase=1,
         Marquee=2,
-        Pen=3
+        Pen=3,
+        Transform=4
     };
 };
 
@@ -155,6 +156,39 @@ public:
     MarqueeToolFunction(QWidget *parent);
 
     int getSelectionType() const {return selectionType;}
+
+};
+
+
+//+++++++++++++Transform+Tool+++++++++++++++++++++++++++++++++++++
+class TransformToolBase
+{
+protected:
+};
+
+
+class TransformToolTweak
+        :public ToolTweak,
+        protected TransformToolBase
+{
+    Q_OBJECT
+public:
+    TransformToolTweak(QWidget *parent);
+
+private slots:
+    //void setSelectionType(int value){selectionType=value; qDebug()<<value;}
+
+};
+
+class TransformToolFunction
+        :public QObject,
+        protected TransformToolBase
+{
+    Q_OBJECT
+public:
+    TransformToolFunction(QWidget *parent);
+
+    //int getSelectionType() const {return selectionType;}
 
 };
 

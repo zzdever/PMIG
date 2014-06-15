@@ -46,6 +46,7 @@ public:
 protected:
     void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
+//    void keyPressEvent(QKeyEvent *event);
 
 public slots:
     void openFile();
@@ -91,6 +92,10 @@ private slots:
     void setToolErase(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Erase);
     }
+    void setToolTransform(bool toggle){
+        if(toggle) switchToolsToolBar(ToolType::Transform);
+    }
+
     void setColor(int);
     //void setBgColor(void);
 

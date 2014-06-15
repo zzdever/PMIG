@@ -156,3 +156,17 @@ MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
 {
     ;
 }
+
+//+++++++++++Transform+TOOL+++++++++++++++++++++++++++++++++++++++
+
+TransformToolTweak::TransformToolTweak(QWidget *parent)
+    :ToolTweak("TRANSFORM TOOL", parent)
+{
+    ;
+}
+
+TransformToolFunction::TransformToolFunction(QWidget *parent)
+    :QObject(parent)
+{
+    ;
+}

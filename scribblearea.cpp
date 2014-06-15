@@ -18,7 +18,7 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
 
         switch(toolType)
         {
-        case ToolType::Marquee:
+        case ToolType::Marquee:{
             vertexLeftTop.x=eventX;
             vertexLeftTop.y=eventY;
 
@@ -27,6 +27,10 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
                        << QPointF(event->pos().x(), event->pos().y())
                        << QPointF(event->pos().x(), event->pos().y())
                        << QPointF(event->pos().x(), event->pos().y());
+
+            break;
+        }
+        case ToolType::Transform:
 
             break;
         default: break;
@@ -83,7 +87,8 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
 
 void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(totalImageNum <= 0) return;
+    if(totalImageNum <= 0) return;  
+    if(isMousePressed==false) return;
     isMousePressed = false;
 
     if (event->button() == Qt::LeftButton && isMouseMoving) {
@@ -126,12 +131,13 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
         case ToolType::Brush:
         case ToolType::Erase:
             break;
-        case ToolType::Marquee:
+        case ToolType::Marquee:{
             somethingSelected=false;
             marqueeHandlerControl.clear();
             marqueeHandler->setPoints(marqueeHandlerControl);
             update();
             break;
+        }
 //        case ToolType::Erase:
 //            break;
 
@@ -223,6 +229,11 @@ void ScribbleArea::keyPressEvent(QKeyEvent *event)
         ApplyToolFunction();
         toolType=type;
     }
+
+    if(event->matches(QKeySequence::SelectAll))
+    {
+        selectAll();
+    }
 }
 
 void ScribbleArea::enterEvent(QEvent * event)
@@ -257,12 +268,27 @@ void ScribbleArea::updateCursor()
 void ScribbleArea::setToolType(ToolType::toolType type)
 {
     toolType=type;
-
     if(totalImageNum>0) updateCursor();
-
     return;
 }
 
+
+void ScribbleArea::selectAll(void)
+{
+    if(totalImageNum <= 0) return;
+    marqueeHandlerControl.clear();
+    marqueeHandlerControl << QPointF(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                                     imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+               << QPointF(imageCentralPoint.x()+imageStackDisplay[currentImageNum].width()/2,
+                          imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+               << QPointF(imageCentralPoint.x()+imageStackDisplay[currentImageNum].width()/2,
+                          imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2)
+               << QPointF(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                          imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2);
+    marqueeHandler->setPoints(marqueeHandlerControl);
+    somethingSelected = true;
+    update();
+}
 
 
 //!
@@ -299,14 +325,45 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     marqueeHandler->setShapePen(QPen(QColor(0, 0, 0, toolIndicationAlpha)));
     marqueeHandler->setConnectionPen(QPen(QColor(0, 0, 0, toolIndicationAlpha)));
     //marqueeHandler->setBoundingRect(QRectF(0, 0, 500, 500));
-    //            connect(pts, SIGNAL(pointsChanged(QPolygonF)),
-    //                    this, SLOT(updateCtrlPoints(QPolygonF)));
+    connect(marqueeHandler, SIGNAL(pointsChanged(QPolygonF)),this, SLOT(updateMarqueeHandlerControlPoints(QPolygonF)));
 
     //setMouseTracking(true);
 
 }
 //! [0]
 
+void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
+{
+    if(newControlPoints.size()<4) return;
+    QPointF trans;
+
+    if(!(trans=(newControlPoints.at(0)-marqueeHandlerControl.at(0))).isNull()){
+        newControlPoints[1].ry() += trans.ry();
+        newControlPoints[3].rx() += trans.rx();
+    }
+    else if(!(trans=(newControlPoints.at(1)-marqueeHandlerControl.at(1))).isNull()){
+        newControlPoints[0].ry() += trans.ry();
+        newControlPoints[2].rx() += trans.rx();
+    }
+    else if(!(trans=(newControlPoints.at(2)-marqueeHandlerControl.at(2))).isNull()){
+        newControlPoints[3].ry() += trans.ry();
+        newControlPoints[1].rx() += trans.rx();
+    }
+    else if(!(trans=(newControlPoints.at(3)-marqueeHandlerControl.at(3))).isNull()){
+        newControlPoints[2].ry() += trans.ry();
+        newControlPoints[0].rx() += trans.rx();
+    }
+
+    marqueeHandler->setPoints(newControlPoints);
+    marqueeHandlerControl = newControlPoints;
+    update();
+    vertexLeftTop.x=marqueeHandlerControl[0].rx()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+    vertexLeftTop.y=marqueeHandlerControl[0].ry()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+    vertexRightBottom.x=marqueeHandlerControl[2].rx()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+    vertexRightBottom.y=marqueeHandlerControl[2].ry()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+
+    return;
+}
 
 ////! [9]
 //void ScribbleArea::clearImage()
