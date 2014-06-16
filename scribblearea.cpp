@@ -8,19 +8,29 @@
 #include "scribblearea.h"
 
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
-{
+{qDebug()<<"press mouse";
     if(totalImageNum <= 0) return;
     if (event->button() == Qt::LeftButton) {
-        isMousePressed = true;
+//        if(event->pos().rx()<imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2)
+//            event->pos().setX(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
+//        if(event->pos().rx()>imageCentralPoint.x()+imageStackDisplay[currentImageNum].width()/2)
+//            event->pos().setX(imageCentralPoint.x()+imageStackDisplay[currentImageNum].width()/2);
+//        if(event->pos().ry()<imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+//            event->pos().setY(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+//        if(event->pos().ry()>imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2)
+//            event->pos().setY(imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2);
 
         int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+
+        isMousePressed = true;
 
         switch(toolType)
         {
         case ToolType::Marquee:
         case ToolType::Lasso:{
             somethingSelected=false;
+            irregularSelectionPoints.clear();
             marqueeHandlerControl.clear();
             marqueeHandler->setPoints(marqueeHandlerControl);
             lassoHandlerControl.clear();
@@ -39,18 +49,13 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
                 irregularSelectionPoints.append({eventX, eventY});
                 irregularSelectionPointNum++;
                 lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
+                lassoHandler->setCloseType(HoverPoints::NoClose);
                 lassoHandler->setPoints(lassoHandlerControl);
                 break;
             default:break;
             }
-
-
-
             break;
         }
-        case ToolType::Transform:
-
-            break;
         default: break;
         }
 
@@ -59,20 +64,23 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
 }
 
 void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
-{
+{qDebug()<<"move mouse";
     if(totalImageNum <= 0) return;
-    if ((event->buttons() & Qt::LeftButton) && isMousePressed){
-        isMouseMoving = true;
 
+    if ((event->buttons() & Qt::LeftButton) && isMousePressed==true){
+//            ((isMousePressed==true) ||(toolType==ToolType::Transform && isMousePressed==false))){ qDebug()<<"pressed move";
         int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
         int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
+        isMouseMoving = true;
+
         switch(toolType)
         {
         case ToolType::Brush:
         case ToolType::Erase:
+        case ToolType::Transform:
             break;
         case ToolType::Marquee:{
             vertexRightBottom.x=eventX;
@@ -94,6 +102,7 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
             irregularSelectionPointNum++;
             lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
             lassoHandler->setPoints(lassoHandlerControl);
+            update();
         }
 //        case ToolType::Erase:
 //            ApplyToolFunction(QPoint(eventX,eventY));
@@ -115,21 +124,23 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
     if(isMousePressed==false) return;
     isMousePressed = false;
 
-    if (event->button() == Qt::LeftButton && isMouseMoving) {
-        isMouseMoving = false;
-
+    if (event->button() == Qt::LeftButton && isMouseMoving) {qDebug()<<"release mouse";
         int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
         int lastX=lastPoint.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int lastY=lastPoint.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
+        isMouseMoving = false;
+
         switch(toolType)
         {
         case ToolType::Brush:
         case ToolType::Erase:
+        case ToolType::Transform:
             break;
         case ToolType::Marquee:{
             somethingSelected=true;
+            selectionType=TwoPointsSelection;
 
             QPointF tmpOriginPoint(marqueeHandlerControl.at(0));
             marqueeHandlerControl.clear();
@@ -148,6 +159,7 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             lassoHandler->setPoints(lassoHandlerControl);
             lassoHandler->setCloseType(HoverPoints::Close);
             somethingSelected=true;
+            selectionType=PolygonSelection;
         }
         default:
             break;
@@ -156,7 +168,7 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
         ApplyToolFunction(QPoint(lastX,lastY), QPoint(eventX,eventY));
 
     }
-    else {
+    else {qDebug()<<"click mouse";
         int eventX=event->pos().x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2);
         int eventY=event->pos().y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
 
@@ -176,6 +188,18 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             somethingSelected=false;
             lassoHandlerControl.clear();
             lassoHandler->setPoints(lassoHandlerControl);
+            update();
+            break;
+        }
+        case ToolType::Pen:{
+            if(event->pos().x()<imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2
+                    || event->pos().rx()>imageCentralPoint.x()+imageStackDisplay[currentImageNum].width()/2
+                    || event->pos().ry()<imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2
+                    || event->pos().ry()>imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2) break;
+            penToolFunction->penHandlerControl << QPointF(event->pos().x(), event->pos().y());
+//            penHandlerControl<< QPointF(event->pos().x(), event->pos().y());
+            penToolFunction->penHandler->setPoints(penToolFunction->penHandlerControl);
+//            penHandler->setPoints(penHandlerControl);
             update();
             break;
         }
@@ -241,6 +265,7 @@ void ScribbleArea::paintEvent(QPaintEvent *event)
                 imageStackDisplay[i]);
         }
     }
+
 }
 //! [14]
 
@@ -324,6 +349,90 @@ void ScribbleArea::selectAll(void)
                           imageCentralPoint.y()+imageStackDisplay[currentImageNum].height()/2);
     marqueeHandler->setPoints(marqueeHandlerControl);
     somethingSelected = true;
+    selectionType=TwoPointsSelection;
+    update();
+}
+
+void ScribbleArea::contextMenuEvent(QContextMenuEvent *event)
+{
+    if(toolType!=ToolType::Pen) return;
+    QCursor cursor = this->cursor();
+    penToolFunction->penMenu->exec(cursor.pos());
+}
+
+void ScribbleArea::makeSelection(void)
+{
+    somethingSelected=false;
+    marqueeHandlerControl.clear();
+    marqueeHandler->setPoints(marqueeHandlerControl);
+    lassoHandlerControl.clear();
+    lassoHandler->setPoints(lassoHandlerControl);
+
+    switch(toolType){
+    case ToolType::Pen:
+        if(penToolFunction->penHandlerControl.size()<=0) return;
+        irregularSelectionPoints.clear();
+        foreach(QPointF tmp, penToolFunction->penHandlerControl){
+            lassoHandlerControl<<tmp;
+            irregularSelectionPoints.append({tmp.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2),
+                                             tmp.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)});
+        }
+        lassoHandler->setCloseType(HoverPoints::Close);
+        lassoHandler->setPoints(lassoHandlerControl);
+        penToolFunction->penHandlerControl.clear();
+        penToolFunction->penHandler->setPoints(penToolFunction->penHandlerControl);
+        break;
+    default:
+        break;
+    } 
+    somethingSelected=true;
+    selectionType=PolygonSelection;
+    update();
+}
+
+void ScribbleArea::setTransformSelectionState(void)
+{
+    if(totalImageNum<=0) return;
+    if(somethingSelected == false) selectAll();
+
+    if(selectionType == TwoPointsSelection){
+        irregularSelectionPoints.clear();
+        irregularSelectionPoints.append(vertexLeftTop);
+        irregularSelectionPoints.append({vertexRightBottom.x, vertexLeftTop.y});
+        irregularSelectionPoints.append(vertexRightBottom);
+        irregularSelectionPoints.append({vertexLeftTop.x, vertexRightBottom.y});
+        irregularSelectionPointNum = 4;
+        selectionType = PolygonSelection;
+    }
+    else {
+        int minX=imageStackDisplay[currentImageNum].width();
+        int maxX=0;
+        int minY=imageStackDisplay[currentImageNum].height();
+        int maxY=0;
+
+        lassoHandlerControl.clear();
+        foreach(CvPoint tmp, irregularSelectionPoints){
+            if(tmp.x<minX) minX=tmp.x;
+            if(tmp.x>maxX) maxX=tmp.x;
+            if(tmp.y<minY) minY=tmp.y;
+            if(tmp.y>maxY) maxY=tmp.y;
+            lassoHandlerControl << QPointF(tmp.x+imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                                           tmp.y+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+        }
+        marqueeHandlerControl.clear();
+        marqueeHandlerControl << QPointF(minX+imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                                         minY+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+                   << QPointF(maxX+imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                              minY+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+                   << QPointF(maxX+imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                              maxY+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)
+                   << QPointF(minX+imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2,
+                              maxY+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
+        marqueeHandler->setPoints(marqueeHandlerControl);
+        lassoHandler->setPoints(lassoHandlerControl);
+        vertexLeftTop={minX, minY};
+        vertexRightBottom={maxX,maxY};
+    }
     update();
 }
 
@@ -345,6 +454,10 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 
     brushToolFunction = new BrushToolFunction(this);
     eraseToolFunction = new EraseToolFunction(this);
+    penToolFunction = new PenToolFunction(this);
+    connect(penToolFunction, SIGNAL(makeSelection()), this, SLOT(makeSelection()));
+    connect(penToolFunction, SIGNAL(strokePath()), this, SLOT(strokeSelectedArea()));
+    connect(penToolFunction, SIGNAL(fillPath()), this, SLOT(fillSelectedArea()));
     fgColor=Qt::black;
     bgColor=Qt::white;
 
@@ -354,6 +467,7 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 
     imageCentralPoint.setX(this->width()/2);
     imageCentralPoint.setY(this->height()/2);
+
 
     marqueeHandler = new HoverPoints(this, HoverPoints::RectangleShape);
     marqueeHandler->setConnectionType(HoverPoints::LineConnection);
@@ -368,20 +482,23 @@ ScribbleArea::ScribbleArea(QWidget *parent)
 
     lassoHandler = new HoverPoints(this, HoverPoints::CircleShape);
     lassoHandler->setConnectionType(HoverPoints::LineConnection);
-    lassoHandler->setCloseType(HoverPoints::NoClose);
+    lassoHandler->setCloseType(HoverPoints::Close);
     lassoHandler->setEditable(false);
-    lassoHandler->setPointSize(QSize(1, 1));
+    lassoHandler->setPointSize(QSize(0, 0));
     lassoHandler->setShapeBrush(QBrush(QColor(0, 0, 0, 255)));
     lassoHandler->setShapePen(QPen(QColor(0, 0, 0, 255)));
     lassoHandler->setConnectionPen(QPen(QColor(0, 0, 0, 255)));
+
     //setMouseTracking(true);
 
 }
 //! [0]
 
 void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
-{return;
-    if(newControlPoints.size()<4) return;
+{
+
+    if(newControlPoints.size()!=4) return;
+
     QPointF trans;
 
     if(!(trans=(newControlPoints.at(0)-marqueeHandlerControl.at(0))).isNull()){

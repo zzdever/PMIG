@@ -162,7 +162,11 @@ MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
 TransformToolTweak::TransformToolTweak(QWidget *parent)
     :ToolTweak("TRANSFORM TOOL", parent)
 {
-    ;
+    //temporary
+    this->addSeparator();
+    QLabel *note = new QLabel("Sorry, currently size free transformation is NOT supported",this);
+    this->addWidget(note);
+    //temporary
 }
 
 TransformToolFunction::TransformToolFunction(QWidget *parent)
@@ -172,7 +176,7 @@ TransformToolFunction::TransformToolFunction(QWidget *parent)
 }
 
 
-//+++++++++++Transform+TOOL+++++++++++++++++++++++++++++++++++++++
+//+++++++++++Lasso+TOOL+++++++++++++++++++++++++++++++++++++++
 bool LassoToolBase::magnetic=false;
 
 LassoToolTweak::LassoToolTweak(QWidget *parent)
@@ -188,4 +192,44 @@ LassoToolFunction::LassoToolFunction(QWidget *parent)
     :QObject(parent)
 {
     ;
+}
+
+
+//+++++++++++Pen+TOOL+++++++++++++++++++++++++++++++++++++++
+
+PenToolTweak::PenToolTweak(QWidget *parent)
+    :ToolTweak("PEN TOOL", parent)
+{
+    ;
+}
+
+PenToolFunction::PenToolFunction(QWidget *parent)
+    :QObject(parent)
+{
+    penHandler = new HoverPoints(parent, HoverPoints::CircleShape);
+    penHandler->setConnectionType(HoverPoints::LineConnection);
+    penHandler->setCloseType(HoverPoints::Close);
+    penHandler->setEditable(false);
+    penHandler->setPointSize(QSize(10, 10));
+    penHandler->setShapeBrush(QBrush(QColor(0, 0, 0, 255)));
+    penHandler->setShapePen(QPen(QColor(0, 0, 0, 150)));
+    penHandler->setConnectionPen(QPen(QColor(0, 0, 0, 150)));
+    connect(penHandler, SIGNAL(pointsChanged(QPolygonF)),this, SLOT(updatePenHandlerControlPoints(QPolygonF)));
+
+    penHandlerControl.clear();
+
+    penMenu = new QMenu;
+    QAction *action = new QAction("Clear pen Points", penMenu);
+    connect(action, SIGNAL(triggered()), this, SLOT(clearPoints()));
+    penMenu->addAction(action);
+    penMenu->addSeparator();
+    action = new QAction("Make selection", penMenu);
+    connect(action, SIGNAL(triggered()),this,SLOT(makeSelection_()));
+    penMenu->addAction(action);
+    action = new QAction("Stroke path", penMenu);
+    connect(action, SIGNAL(triggered()),this,SLOT(strokePath_()));
+    penMenu->addAction(action);
+    action = new QAction("Fill shape", penMenu);
+    connect(action, SIGNAL(triggered()),this, SLOT(fillPath_()));
+    penMenu->addAction(action);
 }

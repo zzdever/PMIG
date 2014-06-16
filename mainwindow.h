@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow
     //QList<ToolBar*> toolBars;
 
     QMenu *fileMenu;
-    QMenu *mainWindowMenu;
+    QMenu *filterMenu;
     QMenu *windowWidgetMenu;
     QMenu *aboutMenu;
 
@@ -93,7 +93,9 @@ private slots:
         if(toggle) switchToolsToolBar(ToolType::Erase);
     }
     void setToolTransform(bool toggle){
-        if(toggle) switchToolsToolBar(ToolType::Transform);
+        if(toggle) {switchToolsToolBar(ToolType::Transform);
+            centerScribbleArea->setTransformSelectionState();
+        }
     }
     void setToolLasso(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Lasso);

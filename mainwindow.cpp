@@ -111,6 +111,7 @@ void MainWindow::setupToolBar()
     toolsToolBar.insert(ToolType::Marquee, new MarqueeToolTweak(this));
     toolsToolBar.insert(ToolType::Transform, new TransformToolTweak(this));
     toolsToolBar.insert(ToolType::Lasso, new LassoToolTweak(this));
+    toolsToolBar.insert(ToolType::Pen, new PenToolTweak(this));
     foreach (ToolType::toolType tmp, toolsToolBar.keys()) {
         addToolBar(toolsToolBar[tmp]);
     }
@@ -157,6 +158,7 @@ void MainWindow::setupToolBar()
     lassoAct->setCheckable(true);
     connect(lassoAct,SIGNAL(toggled(bool)),this,SLOT(setToolLasso(bool)));
 
+
     toolBoxGroup->addAction(marqueeAct);
     toolBoxGroup->addAction(brushAct);
     toolBoxGroup->addAction(penAct);
@@ -176,11 +178,11 @@ void MainWindow::setupToolBar()
 
 
     toolBox->addAction(marqueeAct);
+    toolBox->addAction(lassoAct);
     toolBox->addAction(brushAct);
     toolBox->addAction(penAct);
     toolBox->addAction(eraseAct);
     toolBox->addAction(transformAct);
-    toolBox->addAction(lassoAct);
 
     toolBox->addSeparator();
 
@@ -294,6 +296,14 @@ void MainWindow::setupMenuBar()
     connect(layoutAct, SIGNAL(triggered()), this, SLOT(loadLayout()));
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
+
+
+    filterMenu = new QMenu(tr("&Filter"), this);
+    menuBar()->addMenu(filterMenu);
+
+    QAction *filterAct = new QAction(tr("Black and White"), this);
+    connect(filterAct, SIGNAL(triggered()), centerScribbleArea, SLOT(blackAndWhite()));
+    filterMenu->addAction(filterAct);
 
 
     windowWidgetMenu = menuBar()->addMenu(tr("&Window"));

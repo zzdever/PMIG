@@ -8,6 +8,8 @@
 #include <QSpinBox>
 #include <QDebug>
 
+#include "shared/hoverpoints.h"
+
 class ToolType{
 public:
     enum toolType{
@@ -227,4 +229,56 @@ public:
 
 };
 
+
+//+++++++++++++Pen+Tool+++++++++++++++++++++++++++++++++++++
+class PenToolBase
+{
+protected:
+};
+
+
+class PenToolTweak
+        :public ToolTweak,
+        protected PenToolBase
+{
+    Q_OBJECT
+public:
+    PenToolTweak(QWidget *parent);
+
+private slots:
+    //void setSelectionType(int value){selectionType=value;}
+
+};
+
+class PenToolFunction
+        :public QObject,
+        protected PenToolBase
+{
+    Q_OBJECT
+public:
+    PenToolFunction(QWidget *parent);
+
+    HoverPoints *penHandler;
+    QPolygonF penHandlerControl;
+    QMenu *penMenu;
+    //int getSelectionType() const {return selectionType;}
+private slots:
+    void updatePenHandlerControlPoints(QPolygonF points) {
+        penHandlerControl=points;
+        penHandler->setPoints(points);
+    }
+    void makeSelection_() {emit makeSelection();}
+    void strokePath_() {emit makeSelection(); emit strokePath(); }
+    void fillPath_() {emit makeSelection(); emit fillPath();}
+public slots:
+    void clearPoints() {
+        penHandlerControl.clear();
+        penHandler->setPoints(penHandlerControl);
+    }
+
+signals:
+    void makeSelection();
+    void strokePath();
+    void fillPath();
+};
 #endif // TOOLBOX_H

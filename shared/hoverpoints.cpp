@@ -42,6 +42,7 @@
 #ifdef QT_OPENGL_SUPPORT
 #include <QGLWidget>
 #endif
+#include <QMouseEvent>
 
 #include "hoverpoints.h"
 
@@ -147,7 +148,6 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
                     return true;
                 }
             }
-
         }
         break;
 

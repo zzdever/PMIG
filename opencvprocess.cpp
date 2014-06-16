@@ -51,7 +51,7 @@ bool ScribbleArea::openImage(const QString &fileName)
     if(totalImageNum == 1)
     {
         QMessageBox *tmpMessage = new QMessageBox(this);
-        tmpMessage->setText("Sorry, currently only one layer is supported,");
+        tmpMessage->setText("Sorry, currently only one layer is supported.");
         tmpMessage->show();
         return false;
     }
@@ -119,12 +119,39 @@ void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
     case ToolType::Erase:
         drawLineTo(lastPoint, currentPoint);
         break;
+    case ToolType::Transform:{
+        //Pay attetion that vertexLeftTop may be not LeftTop
+        //and vertexRightBottom may be not RightBottom
+        if(lastPoint.x()>vertexLeftTop.x+5 && lastPoint.x()<vertexRightBottom.x-5
+                && lastPoint.y()>vertexLeftTop.y+5 && lastPoint.y()<vertexRightBottom.y-5){
+            qDebug()<<"In, move, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+
+            for(QVector<CvPoint>::iterator iter=irregularSelectionPoints.begin();iter!=irregularSelectionPoints.end();iter++){
+                (*iter).x+=currentPoint.x()-lastPoint.x();
+                (*iter).y+=currentPoint.y()-lastPoint.y();
+            }
+        }
+        else if(lastPoint.x()<vertexLeftTop.x-5 || lastPoint.x()>vertexRightBottom.x+5
+                || lastPoint.y()<vertexLeftTop.y-5 || lastPoint.y()>vertexRightBottom.y+5)
+            qDebug()<<"Out, rotate, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+        else{
+            qDebug()<<"On, transform, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+
+            for(QVector<CvPoint>::iterator iter=irregularSelectionPoints.begin();iter!=irregularSelectionPoints.end();iter++){
+                (*iter).x+=currentPoint.x()-lastPoint.x();
+                (*iter).y+=currentPoint.y()-lastPoint.y();
+            }
+        }
+
+        setTransformSelectionState();
+
+        break;
+    }
     default:
         break;
     }
 
     //ALL CHANGE MADE TO IMAGE MUST CALL THIS TO DISPALY
-    //emit
     updateDisplay(currentImageNum);
 }
 
@@ -155,7 +182,6 @@ void ScribbleArea::ApplyToolFunction()
         break;
     }
 
-    //emit
     updateDisplay(currentImageNum);
 }
 
@@ -208,12 +234,13 @@ void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 
 void ScribbleArea::deleteSelectedArea()
 {
-    switch (toolType){
-    case ToolType::Marquee:
-        if(somethingSelected == false) {return;}
+    if(somethingSelected == false) {return;}
+
+    switch (selectionType){
+    case TwoPointsSelection:
         cvRectangle(imageStackEdit[currentImageNum], vertexLeftTop, vertexRightBottom, CV_RGB(255,255,255), -1);
         break;
-    case ToolType::Lasso:
+    case PolygonSelection:
         foreach(CvPoint tmp, irregularSelectionPoints){
             qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
         }
@@ -221,6 +248,42 @@ void ScribbleArea::deleteSelectedArea()
         break;
     }
 
-    emit updateDisplay(currentImageNum);
+    updateDisplay(currentImageNum);
 }
 
+void ScribbleArea::strokeSelectedArea(void)
+{
+    if(somethingSelected == false) return;
+
+    //test
+    foreach(CvPoint tmp, irregularSelectionPoints){
+        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+    }
+    //end test
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::fillSelectedArea(void)
+{
+    if(somethingSelected == false) return;
+
+    //test
+    foreach(CvPoint tmp, irregularSelectionPoints){
+        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+    }
+    //end test
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::blackAndWhite(void)
+{
+    //test
+    qDebug()<<"balck and white";
+    //test
+
+    if(somethingSelected == false) return;
+
+    updateDisplay(currentImageNum);
+}

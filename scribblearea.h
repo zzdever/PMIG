@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QWidget>
 #include <QList>
+#include <QCursor>
 
 #include <cv.h>
 #include <highgui.h>
@@ -39,13 +40,17 @@ public:
     void drawLineTo(QPoint lastPoint, QPoint currentPoint);
     void resizeImage(QImage *image, const QSize &newSize);
     void deleteSelectedArea(void);
-
+    void setTransformSelectionState(void);
 
 public slots:
 //    void clearImage();
 //    void print();
     void updateDisplay(int changedImageNum);
     void updateCursor();
+    void makeSelection(void);
+    void strokeSelectedArea(void);
+    void fillSelectedArea(void);
+    void blackAndWhite(void);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -55,6 +60,7 @@ protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
     void keyPressEvent(QKeyEvent *event);
+    void contextMenuEvent(QContextMenuEvent *event);
     //    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
@@ -62,16 +68,21 @@ private:
     QList<QImage> imageStackDisplay;
     QPoint imageCentralPoint;
 
+    QMenu* penMenu;
+
     ToolType::toolType toolType;
     const int toolIndicationAlpha;
     QPolygonF marqueeHandlerControl;
     HoverPoints *marqueeHandler;
     QPolygonF lassoHandlerControl;
     HoverPoints *lassoHandler;
+    //QPolygonF penHandlerControl;
+    //HoverPoints *penHandler;
     HoverPoints *anchorPoint;
 
     BrushToolFunction *brushToolFunction;
     EraseToolFunction *eraseToolFunction;
+    PenToolFunction *penToolFunction;
 
     QList<IplImage*> imageStackEdit;
 //    QList<Mat> imageStack;
@@ -79,6 +90,9 @@ private:
     QImage IplImage2QImage(const IplImage *iplImage, double mini, double maxi);
 
 
+    static const uchar TwoPointsSelection=0;
+    static const uchar PolygonSelection=1;
+    uchar selectionType;
     QPoint lastPoint;
     CvPoint vertexLeftTop, vertexRightBottom;  // ellipse selection also uses this
     QVector<CvPoint> irregularSelectionPoints;
@@ -92,6 +106,11 @@ private:
 
 private slots:
     void updateMarqueeHandlerControlPoints(QPolygonF);
+
+//    void updatePenHandlerControlPoints(QPolygonF points) {
+//        penHandlerControl=points;
+//        penHandler->setPoints(points);
+//    }
 
 };
 
