@@ -304,6 +304,27 @@ void MainWindow::setupMenuBar()
     QAction *filterAct = new QAction(tr("Black and White"), this);
     connect(filterAct, SIGNAL(triggered()), centerScribbleArea, SLOT(blackAndWhite()));
     filterMenu->addAction(filterAct);
+    //Gaussian Blur
+    QAction *filterGaussianBlurAct = new QAction(tr("Gaussian Blur"), this);
+    connect(filterGaussianBlurAct, SIGNAL(triggered()), centerScribbleArea, SLOT(gaussianBlur()));
+    filterMenu->addAction(filterGaussianBlurAct);
+    //Canny Edge Detector
+    QAction *filterCannyEdgeAct = new QAction(tr("Canny Edge Detector"), this);
+    connect(filterCannyEdgeAct, SIGNAL(triggered()), centerScribbleArea, SLOT(cannyEdge()));
+    filterMenu->addAction(filterCannyEdgeAct);
+    //Erode
+    QAction *filterErodeAct = new QAction(tr("Erode"), this);
+    connect(filterErodeAct, SIGNAL(triggered()), centerScribbleArea, SLOT(erodeFilter()));
+    filterMenu->addAction(filterErodeAct);
+    //Dilate
+    QAction *filterDilateAct = new QAction(tr("Dilate"), this);
+    connect(filterDilateAct, SIGNAL(triggered()), centerScribbleArea, SLOT(dilateFilter()));
+    filterMenu->addAction(filterDilateAct);
+    //Grabcut
+    QAction *filterGrabcutAct = new QAction(tr("Grab Cut"), this);
+    connect(filterGrabcutAct, SIGNAL(triggered()), centerScribbleArea, SLOT(grabcutFilter()));
+    filterMenu->addAction(filterGrabcutAct);
+
 
 
     windowWidgetMenu = menuBar()->addMenu(tr("&Window"));

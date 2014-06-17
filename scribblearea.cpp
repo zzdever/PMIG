@@ -782,3 +782,15 @@ QImage ScribbleArea::IplImage2QImage(const IplImage *iplImage, double mini, doub
     free(qImageBuffer);
     return qImage;
 }
+
+void ScribbleArea::readjustRect(){
+    int minX=std::min(vertexLeftTop.x,vertexRightBottom.x);
+    int maxX=std::max(vertexLeftTop.x,vertexRightBottom.x);
+    int minY=std::min(vertexLeftTop.y,vertexRightBottom.y);
+    int maxY=std::max(vertexLeftTop.y,vertexRightBottom.y);
+
+    vertexLeftTop.x=minX;
+    vertexLeftTop.y=minY;
+    vertexRightBottom.x=maxX;
+    vertexRightBottom.y=maxY;
+}

@@ -277,13 +277,147 @@ void ScribbleArea::fillSelectedArea(void)
     updateDisplay(currentImageNum);
 }
 
-void ScribbleArea::blackAndWhite(void)
-{
-    //test
-    qDebug()<<"balck and white";
-    //test
 
+
+
+void ScribbleArea::blackAndWhite(void){
+    qDebug()<<"balck and white";
     if(somethingSelected == false) return;
 
+    Ipl2Mat();
+    drawMask();
+    cv::cvtColor(tmpImage,tmpImage,CV_BGR2GRAY);
+    cv::cvtColor(tmpImage,tmpImage,CV_GRAY2BGR);
+    Mat2Ipl();
+
     updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::gaussianBlur(void){
+    qDebug()<<"gaussian blur";
+    Ipl2Mat();
+    drawMask();
+
+    int size=5;
+    //!!pop a diaglog to get size
+
+    cv::GaussianBlur( tmpImage, tmpImage, cv::Size( size, size ), 0, 0 );
+    Mat2Ipl();
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::cannyEdge(void){
+    qDebug()<<"canny edge";
+    Ipl2Mat();
+    drawMask();
+
+    int threshold=50;
+    //!!pop a diaglog to get threshold
+
+    cv::Canny(tmpImage,tmpImage,threshold,threshold*3);
+    cv::cvtColor(tmpImage,tmpImage,CV_GRAY2BGR);
+    qDebug()<<tmpImage.channels();
+    Mat2Ipl();
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::erodeFilter(void){
+    qDebug()<<"erode";
+    Ipl2Mat();
+    drawMask();
+
+    int size=1;
+    //!!pop a diaglog to get size
+
+    cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT,
+                                                 cv::Size( 2*size + 1, 2*size+1 ),
+                                                 cv::Point( size, size ) );
+    cv::erode(tmpImage,tmpImage,element);
+    Mat2Ipl();
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::dilateFilter(void){
+    qDebug()<<"dilate";
+    Ipl2Mat();
+    drawMask();
+
+    int size=1;
+    //!!pop a diaglog to get size
+
+    cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT,
+                                                 cv::Size( 2*size + 1, 2*size+1 ),
+                                                 cv::Point( size, size ) );
+    cv::dilate(tmpImage,tmpImage,element);
+    Mat2Ipl();
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::grabcutFilter(void){
+    qDebug()<<"grab cut";
+    Ipl2Mat();
+    drawMask(cv::GC_PR_FGD);
+
+    cv::Mat bkgModel,fgrModel;
+
+    cv::grabCut(tmpImage,  // input image
+                mask, // segmentation result
+                cv::Rect(),bkgModel,fgrModel,3,cv::GC_INIT_WITH_MASK);
+    mask=mask&1;
+
+    cv::Mat tmp=cv::Mat(imageStackEdit[currentImageNum]);
+    tmp.setTo(cv::Scalar(bgColor.blue(),bgColor.green(),bgColor.red()));
+    IplImage tmpIpl=tmp;
+    cvConvertImage(&tmpIpl,imageStackEdit[currentImageNum]);
+
+    Mat2Ipl();
+
+    updateDisplay(currentImageNum);
+}
+
+void ScribbleArea::Ipl2Mat(){
+    cv::Mat tmp=cv::Mat(imageStackEdit[currentImageNum]);
+    tmpImage=tmp.clone();
+}
+
+void ScribbleArea::drawMask(int value){
+    mask=cv::Mat(tmpImage.rows,tmpImage.cols, CV_8U);
+    mask.setTo(0);
+    if(somethingSelected == false){
+        mask.setTo(value);
+    }
+    else{
+        if(selectionType==TwoPointsSelection){
+            readjustRect();
+            cv::rectangle(mask,cv::Point(vertexLeftTop),cv::Point(vertexRightBottom),value,-1);
+        }
+        else{
+            foreach(CvPoint tmp, irregularSelectionPoints){
+                qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+            }
+            cv::Point points[1][irregularSelectionPoints.length()];
+            for(int i=0;i<irregularSelectionPoints.length();i++){
+                points[0][i]=irregularSelectionPoints[i];
+            }
+            const cv::Point* ppt[1] = { points[0] };
+            int npt[] = { irregularSelectionPoints.length() };
+
+            cv::fillPoly( mask,
+                      ppt,
+                      npt,
+                      1,
+                      value);
+        }
+    }
+}
+
+void ScribbleArea::Mat2Ipl(){
+    cv::Mat tmp=cv::Mat(imageStackEdit[currentImageNum]);
+    tmpImage.copyTo(tmp,mask);
+    IplImage tmpIpl=tmp;
+    cvConvertImage(&tmpIpl,imageStackEdit[currentImageNum]);
 }

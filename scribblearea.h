@@ -10,6 +10,7 @@
 
 #include <cv.h>
 #include <highgui.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "toolbox.h"
 #include "opencvprocess.h"
@@ -51,6 +52,12 @@ public slots:
     void strokeSelectedArea(void);
     void fillSelectedArea(void);
     void blackAndWhite(void);
+    void gaussianBlur(void);
+    void cannyEdge(void);
+    void erodeFilter(void);
+    void dilateFilter(void);
+    void grabcutFilter(void);
+
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -111,6 +118,16 @@ private slots:
 //        penHandlerControl=points;
 //        penHandler->setPoints(points);
 //    }
+
+private:
+
+    cv::Mat tmpImage;
+    cv::Mat mask;
+
+    void Ipl2Mat();
+    void drawMask(int value=100);
+    void Mat2Ipl();
+    void readjustRect();
 
 };
 
