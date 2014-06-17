@@ -350,6 +350,8 @@ void ScribbleArea::selectAll(void)
     marqueeHandler->setPoints(marqueeHandlerControl);
     somethingSelected = true;
     selectionType=TwoPointsSelection;
+    vertexLeftTop={0,0};
+    vertexRightBottom={imageStackDisplay[currentImageNum].width(), imageStackDisplay[currentImageNum].height()};
     update();
 }
 
