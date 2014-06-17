@@ -255,11 +255,18 @@ void ScribbleArea::strokeSelectedArea(void)
 {
     if(somethingSelected == false) return;
 
-    //test
-    foreach(CvPoint tmp, irregularSelectionPoints){
-        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+//    foreach(CvPoint tmp, irregularSelectionPoints){
+//        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+//    }
+    int size=1;
+    int lineType=8;
+
+    for(int i=0;i<irregularSelectionPoints.length()-1;i++){
+        cvLine(imageStackEdit[currentImageNum], irregularSelectionPoints[i], irregularSelectionPoints[i+1],
+               cvScalar(fgColor.blue(),fgColor.green(), fgColor.red(), fgColor.alpha()), size, lineType);
     }
-    //end test
+    cvLine(imageStackEdit[currentImageNum], irregularSelectionPoints[irregularSelectionPoints.length()-1],
+            irregularSelectionPoints[0],cvScalar(fgColor.blue(),fgColor.green(), fgColor.red(), fgColor.alpha()), size, lineType);
 
     updateDisplay(currentImageNum);
 }
@@ -268,11 +275,13 @@ void ScribbleArea::fillSelectedArea(void)
 {
     if(somethingSelected == false) return;
 
-    //test
-    foreach(CvPoint tmp, irregularSelectionPoints){
-        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
-    }
-    //end test
+//    foreach(CvPoint tmp, irregularSelectionPoints){
+//        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+//    }
+    Ipl2Mat();
+    drawMask();
+    tmpImage.setTo(cv::Scalar(fgColor.blue(),fgColor.green(),fgColor.red()));
+    Mat2Ipl();
 
     updateDisplay(currentImageNum);
 }
