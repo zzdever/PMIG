@@ -128,6 +128,10 @@ private:
     void drawMask(int value=100);
     void Mat2Ipl();
     void readjustRect();
+    void dragMoveSelectedArea();
+    void rotateSelectedArea();
+
+
 
 };
 
