@@ -124,19 +124,21 @@ void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
         //and vertexRightBottom may be not RightBottom
         if(lastPoint.x()>vertexLeftTop.x+5 && lastPoint.x()<vertexRightBottom.x-5
                 && lastPoint.y()>vertexLeftTop.y+5 && lastPoint.y()<vertexRightBottom.y-5){
-            qDebug()<<"In, move, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
-
+//            qDebug()<<"In, move, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+            dragMoveSelectedArea();
             for(QVector<CvPoint>::iterator iter=irregularSelectionPoints.begin();iter!=irregularSelectionPoints.end();iter++){
                 (*iter).x+=currentPoint.x()-lastPoint.x();
                 (*iter).y+=currentPoint.y()-lastPoint.y();
             }
         }
         else if(lastPoint.x()<vertexLeftTop.x-5 || lastPoint.x()>vertexRightBottom.x+5
-                || lastPoint.y()<vertexLeftTop.y-5 || lastPoint.y()>vertexRightBottom.y+5)
-            qDebug()<<"Out, rotate, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+                || lastPoint.y()<vertexLeftTop.y-5 || lastPoint.y()>vertexRightBottom.y+5){
+            rotateSelectedArea();
+//            qDebug()<<"Out, rotate, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+        }
         else{
-            qDebug()<<"On, transform, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
-
+//            qDebug()<<"On, transform, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+            dragMoveSelectedArea();
             for(QVector<CvPoint>::iterator iter=irregularSelectionPoints.begin();iter!=irregularSelectionPoints.end();iter++){
                 (*iter).x+=currentPoint.x()-lastPoint.x();
                 (*iter).y+=currentPoint.y()-lastPoint.y();
@@ -394,7 +396,7 @@ void ScribbleArea::Ipl2Mat(){
 }
 
 void ScribbleArea::drawMask(int value){
-    mask=cv::Mat(tmpImage.rows,tmpImage.cols, CV_8U);
+    mask=cv::Mat(imageStackEdit[currentImageNum]->height,imageStackEdit[currentImageNum]->width, CV_8U);
     mask.setTo(0);
     if(somethingSelected == false){
         mask.setTo(value);
@@ -405,9 +407,9 @@ void ScribbleArea::drawMask(int value){
             cv::rectangle(mask,cv::Point(vertexLeftTop),cv::Point(vertexRightBottom),value,-1);
         }
         else{
-            foreach(CvPoint tmp, irregularSelectionPoints){
-                qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
-            }
+//            foreach(CvPoint tmp, irregularSelectionPoints){
+//                qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
+//            }
             cv::Point points[1][irregularSelectionPoints.length()];
             for(int i=0;i<irregularSelectionPoints.length();i++){
                 points[0][i]=irregularSelectionPoints[i];
@@ -433,16 +435,134 @@ void ScribbleArea::Mat2Ipl(){
 
 void ScribbleArea::dragMoveSelectedArea()
 {
-    if(isMousePressed==true); // display move
+    qDebug()<<"drag";
+    if(isMousePressed==true){ // display move
+        drawMask();
+        if(originalImageSaved==false){
+            qDebug()<<"set originalImageSaved";
+            Ipl2Mat();
+            partImage=cv::Mat(tmpImage,cv::Rect(vertexLeftTop.x,vertexLeftTop.y,
+                                                vertexRightBottom.x-vertexLeftTop.x,
+                                                vertexRightBottom.y-vertexLeftTop.y)).clone();
+            originalImage=tmpImage.clone();
+            tmpImage.setTo(cv::Scalar(bgColor.blue(),bgColor.green(),bgColor.red()));
+            tmpImage.copyTo(originalImage,mask);
 
-    else;  //actual move
+            originalImageSaved=true;
+        }
+        cv::Mat tmp(tmpImage.rows,tmpImage.cols,tmpImage.type());
 
-
+        partImage.copyTo(cv::Mat(tmp,cv::Rect(vertexLeftTop.x,vertexLeftTop.y,
+                                             vertexRightBottom.x-vertexLeftTop.x,
+                                             vertexRightBottom.y-vertexLeftTop.y)));
+        tmpImage=originalImage.clone();
+        tmp.copyTo(tmpImage,mask);
+        IplImage tmpIpl=tmpImage;
+        cvConvertImage(&tmpIpl,imageStackEdit[currentImageNum]);
+    }
+    else  //actual move
+        originalImageSaved=false;
+    updateDisplay(currentImageNum);
 }
 
 void ScribbleArea::rotateSelectedArea()
 {
-    if(isMousePressed==true); // display move
+    qDebug()<<"rotate";
+    if(isMousePressed==true){ // display move
+        if(originalImageSaved==false){
+            qDebug()<<"set originalImageSaved";
+            Ipl2Mat();
+            drawMask();
+            partImage=cv::Mat(tmpImage,cv::Rect(vertexLeftTop.x,vertexLeftTop.y,
+                                                vertexRightBottom.x-vertexLeftTop.x,
+                                                vertexRightBottom.y-vertexLeftTop.y)).clone();
+            partMask=cv::Mat(mask,cv::Rect(vertexLeftTop.x,vertexLeftTop.y,
+                                                vertexRightBottom.x-vertexLeftTop.x,
+                                                vertexRightBottom.y-vertexLeftTop.y)).clone();
+//            cv::imshow("partmask",partMask);
+//            cv::waitKey();
+            originalImage=tmpImage.clone();
+            tmpImage.setTo(cv::Scalar(bgColor.blue(),bgColor.green(),bgColor.red()));
+            tmpImage.copyTo(originalImage,mask);
 
-    else;  //actual move
+            originalImageSaved=true;
+        }
+        int midX=(vertexLeftTop.x+vertexRightBottom.x)/2;
+        int midY=(vertexLeftTop.y+vertexRightBottom.y)/2;
+        double angle=acos(
+                    (double)((firstPoint.x()-midX)*(lastPoint.x()-midX)+
+                             (firstPoint.y()-midY)*(lastPoint.y()-midY))/
+                    (double)(sqrt((firstPoint.x()-midX)*(firstPoint.x()-midX)+
+                                  (firstPoint.y()-midY)*(firstPoint.y()-midY))*
+                             sqrt((lastPoint.x()-midX)*(lastPoint.x()-midX)+
+                                  (lastPoint.y()-midY)*(lastPoint.y()-midY)))
+                    );
+        angle=-angle;
+        if(lastPoint.y()>((double)(firstPoint.y()-midY)/(double)(firstPoint.x()-midX)*
+                (lastPoint.x()-midX)+midY))
+            angle=-angle;
+        qDebug()<<angle;
+        IplImage partImageIpl=partImage;
+        IplImage partMaskIpl=partMask;
+        cv::Mat partImageRotate=cv::Mat(rotateImage2(&partImageIpl,angle));
+        cv::Mat partMaskRotate=cv::Mat(rotateImage2(&partMaskIpl,angle));
+//        cv::imshow("image",partImageRotate);
+//        cv::imshow("mask",partMaskRotate);
+//        cv::waitKey();
+
+//        cv::Mat tmp(tmpImage.rows,tmpImage.cols,tmpImage.type());
+
+
+        tmpImage=originalImage.clone();
+        partImageRotate.copyTo(cv::Mat(tmpImage,cv::Rect(midX-partImageRotate.cols/2,
+                                                         midY-partImageRotate.rows/2,
+                                                         partImageRotate.cols,
+                                                         partImageRotate.rows)),
+                               partMaskRotate);
+//        tmp.copyTo(tmpImage,mask);
+        IplImage tmpIpl=tmpImage;
+        cvConvertImage(&tmpIpl,imageStackEdit[currentImageNum]);
+    }
+    else  //actual move
+        originalImageSaved=false;
+    updateDisplay(currentImageNum);
+}
+
+//旋转图像内容不变，尺寸相应变大
+IplImage* ScribbleArea::rotateImage2(IplImage* img, double angle)
+{
+    double a = sin(angle), b = cos(angle);
+    int width=img->width, height=img->height;
+    //旋转后的新图尺寸
+    int width_rotate= int(height * fabs(a) + width * fabs(b));
+    int height_rotate=int(width * fabs(a) + height * fabs(b));
+    IplImage* img_rotate = cvCreateImage(cvSize(width_rotate, height_rotate), img->depth, img->nChannels);
+    cvZero(img_rotate);
+    //保证原图可以任意角度旋转的最小尺寸
+    int tempLength = sqrt((double)width * width + (double)height *height) + 10;
+    int tempX = (tempLength + 1) / 2 - width / 2;
+    int tempY = (tempLength + 1) / 2 - height / 2;
+    IplImage* temp = cvCreateImage(cvSize(tempLength, tempLength), img->depth, img->nChannels);
+    cvZero(temp);
+    //将原图复制到临时图像tmp中心
+    cvSetImageROI(temp, cvRect(tempX, tempY, width, height));
+    cvCopy(img, temp, NULL);
+    cvResetImageROI(temp);
+    //旋转数组map
+    // [ m0  m1  m2 ] ===>  [ A11  A12   b1 ]
+    // [ m3  m4  m5 ] ===>  [ A21  A22   b2 ]
+    float m[6];
+    int w = temp->width;
+    int h = temp->height;
+    m[0] = b;
+    m[1] = a;
+    m[3] = -m[1];
+    m[4] = m[0];
+    // 将旋转中心移至图像中间
+    m[2] = w * 0.5f;
+    m[5] = h * 0.5f;
+    CvMat M = cvMat(2, 3, CV_32F, m);
+    cvGetQuadrangleSubPix(temp, img_rotate, &M);
+    cvReleaseImage(&temp);
+    return img_rotate;
 }

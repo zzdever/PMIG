@@ -100,6 +100,7 @@ private:
     static const uchar TwoPointsSelection=0;
     static const uchar PolygonSelection=1;
     uchar selectionType;
+    QPoint firstPoint;
     QPoint lastPoint;
     CvPoint vertexLeftTop, vertexRightBottom;  // ellipse selection also uses this
     QVector<CvPoint> irregularSelectionPoints;
@@ -121,7 +122,12 @@ private slots:
 
 private:
 
+    bool originalImageSaved;
+
     cv::Mat tmpImage;
+    cv::Mat originalImage;
+    cv::Mat partImage;
+    cv::Mat partMask;
     cv::Mat mask;
 
     void Ipl2Mat();
@@ -130,7 +136,7 @@ private:
     void readjustRect();
     void dragMoveSelectedArea();
     void rotateSelectedArea();
-
+    IplImage* rotateImage2(IplImage* img, double angle);
 
 
 };
