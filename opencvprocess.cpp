@@ -56,7 +56,7 @@ bool ScribbleArea::openImage(const QString &fileName)
         return false;
     }
 
-    IplImage *img = cvLoadImage(&(fileName.toStdString()[0]));
+    IplImage *img = cvLoadImage(fileName.toStdString().c_str());
     if(img)
     {
         imageStackEdit.append(img);
