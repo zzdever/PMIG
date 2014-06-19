@@ -8,7 +8,11 @@
 #include "scribblearea.h"
 
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
-{qDebug()<<"press mouse";
+{
+
+    firstPoint=QPoint(event->pos().x(),event->pos().y());
+    qDebug()<<"press mouse :"<<firstPoint;
+
     if(totalImageNum <= 0) return;
     if (event->button() == Qt::LeftButton) {
 //        if(event->pos().rx()<imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2)
@@ -64,7 +68,8 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
 }
 
 void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
-{qDebug()<<"move mouse";
+{
+//    qDebug()<<"move mouse";
     if(totalImageNum <= 0) return;
 
     if ((event->buttons() & Qt::LeftButton) && isMousePressed==true){
@@ -453,6 +458,7 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     somethingSelected=false;
     irregularSelectionPoints.clear();
     irregularSelectionPointNum=0;
+    originalImageSaved=false;
 
     brushToolFunction = new BrushToolFunction(this);
     eraseToolFunction = new EraseToolFunction(this);
