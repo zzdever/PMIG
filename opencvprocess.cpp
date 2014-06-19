@@ -430,3 +430,19 @@ void ScribbleArea::Mat2Ipl(){
     IplImage tmpIpl=tmp;
     cvConvertImage(&tmpIpl,imageStackEdit[currentImageNum]);
 }
+
+void ScribbleArea::dragMoveSelectedArea()
+{
+    if(isMousePressed==true); // display move
+
+    else;  //actual move
+
+
+}
+
+void ScribbleArea::rotateSelectedArea()
+{
+    if(isMousePressed==true); // display move
+
+    else;  //actual move
+}
