@@ -26,6 +26,7 @@ public:
     ScribbleArea(QWidget *parent = 0);
 
     bool isModified() const { return modified; }
+    void setModified(bool value) {modified = value; return; }
 
     void setToolType(ToolType::toolType type);
     void setFgColor(QColor color) {fgColor=color;}

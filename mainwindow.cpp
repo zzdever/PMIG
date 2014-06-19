@@ -550,7 +550,7 @@ void MainWindow::saveFile()
 {
     QAction *action = qobject_cast<QAction *>(sender());
     QByteArray fileFormat = action->data().toByteArray();
-    MainWindow::saveWrite(fileFormat);
+    if(MainWindow::saveWrite(fileFormat)) centerScribbleArea->setModified(false);
 }
 
 bool MainWindow::maybeSave()
@@ -571,29 +571,7 @@ bool MainWindow::maybeSave()
     return true;
 }
 
-//! [7]
-//void MainWindow::penColor()
-////! [7] //! [8]
-//{
-//    QColor newColor = QColorDialog::getColor(centerScribbleArea->penColor());
-//    if (newColor.isValid())
-//        centerScribbleArea->setPenColor(newColor);
-//}
-////! [8]
 
-////! [9]
-//void MainWindow::penWidth()
-////! [9] //! [10]
-//{
-//    bool ok;
-//    int newWidth = QInputDialog::getInt(this, tr("Scribble"),
-//                                        tr("Select pen width:"),
-//                                        centerScribbleArea->penWidth(),
-//                                        1, 50, 1, &ok);
-//    if (ok)
-//        centerScribbleArea->setPenWidth(newWidth);
-//}
-////! [10]
 
 void MainWindow::about()
 {
