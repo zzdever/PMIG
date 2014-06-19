@@ -234,6 +234,8 @@ void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 
 void ScribbleArea::deleteSelectedArea()
 {
+    if(totalImageNum<=0) return;
+
     if(somethingSelected == false) {return;}
 
     switch (selectionType){
@@ -253,13 +255,15 @@ void ScribbleArea::deleteSelectedArea()
 
 void ScribbleArea::strokeSelectedArea(void)
 {
+    if(totalImageNum<=0) return;
+
     if(somethingSelected == false) return;
 
 //    foreach(CvPoint tmp, irregularSelectionPoints){
 //        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
 //    }
-    int size=1;
-    int lineType=8;
+    int size=3;
+    int lineType=CV_AA;
 
     for(int i=0;i<irregularSelectionPoints.length()-1;i++){
         cvLine(imageStackEdit[currentImageNum], irregularSelectionPoints[i], irregularSelectionPoints[i+1],
@@ -273,6 +277,8 @@ void ScribbleArea::strokeSelectedArea(void)
 
 void ScribbleArea::fillSelectedArea(void)
 {
+    if(totalImageNum<=0) return;
+
     if(somethingSelected == false) return;
 
 //    foreach(CvPoint tmp, irregularSelectionPoints){
@@ -290,7 +296,8 @@ void ScribbleArea::fillSelectedArea(void)
 
 
 void ScribbleArea::blackAndWhite(void){
-    qDebug()<<"balck and white";
+    if(totalImageNum<=0) return;
+
     if(somethingSelected == false) return;
 
     Ipl2Mat();
@@ -303,12 +310,32 @@ void ScribbleArea::blackAndWhite(void){
 }
 
 void ScribbleArea::gaussianBlur(void){
-    qDebug()<<"gaussian blur";
+    if(totalImageNum<=0) return;
+
     Ipl2Mat();
     drawMask();
 
-    int size=5;
-    //!!pop a diaglog to get size
+    QDialog getSizeDialog(this);
+    getSizeDialog.setWindowTitle("Gaussian Blur");
+
+    QGridLayout *dialogLayout = new QGridLayout(&getSizeDialog);
+    dialogLayout->addWidget(new QLabel(tr("Input size: "), &getSizeDialog),0, 0);
+    QSpinBox *sizeInputBox = new QSpinBox;
+    sizeInputBox->setValue(5);    /// @note Value step need to be set
+    sizeInputBox->setRange(0,100);   /// @note Range need to be set
+    dialogLayout->addWidget(sizeInputBox,0,1);
+
+    QPushButton *okButton = new QPushButton(tr("Ok"), &getSizeDialog);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &getSizeDialog);
+    connect(okButton, SIGNAL(clicked()), &getSizeDialog, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), &getSizeDialog, SLOT(reject()));
+    okButton->setDefault(true);
+    dialogLayout->addWidget(cancelButton);
+    dialogLayout->addWidget(okButton);
+
+    if(!getSizeDialog.exec()) return;
+
+    int size=sizeInputBox->value();
 
     cv::GaussianBlur( tmpImage, tmpImage, cv::Size( size, size ), 0, 0 );
     Mat2Ipl();
@@ -317,12 +344,32 @@ void ScribbleArea::gaussianBlur(void){
 }
 
 void ScribbleArea::cannyEdge(void){
-    qDebug()<<"canny edge";
+    if(totalImageNum<=0) return;
+
     Ipl2Mat();
     drawMask();
 
-    int threshold=50;
-    //!!pop a diaglog to get threshold
+    QDialog getSizeDialog(this);
+    getSizeDialog.setWindowTitle("Canny Edge");
+
+    QGridLayout *dialogLayout = new QGridLayout(&getSizeDialog);
+    dialogLayout->addWidget(new QLabel(tr("Input size: "), &getSizeDialog),0, 0);
+    QSpinBox *sizeInputBox = new QSpinBox;
+    sizeInputBox->setValue(50);
+    sizeInputBox->setRange(0,100);  /// @note Range need to be set
+    dialogLayout->addWidget(sizeInputBox,0,1);
+
+    QPushButton *okButton = new QPushButton(tr("Ok"), &getSizeDialog);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &getSizeDialog);
+    connect(okButton, SIGNAL(clicked()), &getSizeDialog, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), &getSizeDialog, SLOT(reject()));
+    okButton->setDefault(true);
+    dialogLayout->addWidget(cancelButton);
+    dialogLayout->addWidget(okButton);
+
+    if(!getSizeDialog.exec()) return;
+
+    int threshold=sizeInputBox->value();
 
     cv::Canny(tmpImage,tmpImage,threshold,threshold*3);
     cv::cvtColor(tmpImage,tmpImage,CV_GRAY2BGR);
@@ -333,12 +380,33 @@ void ScribbleArea::cannyEdge(void){
 }
 
 void ScribbleArea::erodeFilter(void){
-    qDebug()<<"erode";
+    if(totalImageNum<=0) return;
+
     Ipl2Mat();
     drawMask();
 
-    int size=1;
-    //!!pop a diaglog to get size
+    QDialog getSizeDialog(this);
+    getSizeDialog.setWindowTitle("Eroder Filter");
+
+    QGridLayout *dialogLayout = new QGridLayout(&getSizeDialog);
+    dialogLayout->addWidget(new QLabel(tr("Input size: "), &getSizeDialog),0, 0);
+    QSpinBox *sizeInputBox = new QSpinBox;
+    sizeInputBox->setValue(1);
+    sizeInputBox->setRange(0,100);  /// @note Range need to be set
+    dialogLayout->addWidget(sizeInputBox,0,1);
+
+    QPushButton *okButton = new QPushButton(tr("Ok"), &getSizeDialog);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &getSizeDialog);
+    connect(okButton, SIGNAL(clicked()), &getSizeDialog, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), &getSizeDialog, SLOT(reject()));
+    okButton->setDefault(true);
+    dialogLayout->addWidget(cancelButton);
+    dialogLayout->addWidget(okButton);
+
+    if(!getSizeDialog.exec()) return;
+
+    int size=sizeInputBox->value();
+
 
     cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT,
                                                  cv::Size( 2*size + 1, 2*size+1 ),
@@ -350,12 +418,33 @@ void ScribbleArea::erodeFilter(void){
 }
 
 void ScribbleArea::dilateFilter(void){
-    qDebug()<<"dilate";
+    if(totalImageNum<=0) return;
+
     Ipl2Mat();
     drawMask();
 
-    int size=1;
-    //!!pop a diaglog to get size
+    QDialog getSizeDialog(this);
+    getSizeDialog.setWindowTitle("Dilate Filter");
+
+    QGridLayout *dialogLayout = new QGridLayout(&getSizeDialog);
+    dialogLayout->addWidget(new QLabel(tr("Input size: "), &getSizeDialog),0, 0);
+    QSpinBox *sizeInputBox = new QSpinBox;
+    sizeInputBox->setValue(1);
+    sizeInputBox->setRange(0,100);  /// @note Range need to be set
+    dialogLayout->addWidget(sizeInputBox,0,1);
+
+    QPushButton *okButton = new QPushButton(tr("Ok"), &getSizeDialog);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &getSizeDialog);
+    connect(okButton, SIGNAL(clicked()), &getSizeDialog, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), &getSizeDialog, SLOT(reject()));
+    okButton->setDefault(true);
+    dialogLayout->addWidget(cancelButton);
+    dialogLayout->addWidget(okButton);
+
+    if(!getSizeDialog.exec()) return;
+
+    int size=sizeInputBox->value();
+
 
     cv::Mat element = cv::getStructuringElement( cv::MORPH_RECT,
                                                  cv::Size( 2*size + 1, 2*size+1 ),
@@ -367,7 +456,8 @@ void ScribbleArea::dilateFilter(void){
 }
 
 void ScribbleArea::grabcutFilter(void){
-    qDebug()<<"grab cut";
+    if(totalImageNum<=0) return;
+
     Ipl2Mat();
     drawMask(cv::GC_PR_FGD);
 
