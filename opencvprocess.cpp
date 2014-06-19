@@ -353,7 +353,7 @@ void ScribbleArea::cannyEdge(void){
     getSizeDialog.setWindowTitle("Canny Edge");
 
     QGridLayout *dialogLayout = new QGridLayout(&getSizeDialog);
-    dialogLayout->addWidget(new QLabel(tr("Input size: "), &getSizeDialog),0, 0);
+    dialogLayout->addWidget(new QLabel(tr("Input threshold: "), &getSizeDialog),0, 0);
     QSpinBox *sizeInputBox = new QSpinBox;
     sizeInputBox->setValue(50);
     sizeInputBox->setRange(0,100);  /// @note Range need to be set
