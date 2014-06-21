@@ -44,7 +44,7 @@ void PanelFrame::paintEvent(QPaintEvent *)
     QSize sz = size();
     QString text = QString::fromLatin1("sz: %1x%2\n\n"
                                        "Sorry, currently panel\n"
-                                       "IS NOT implemented")
+                                       "is NOT implemented")
                     .arg(sz.width()).arg(sz.height());
 
     QRect r = fontMetrics().boundingRect(rect(), Qt::AlignLeft|Qt::AlignTop, text);
