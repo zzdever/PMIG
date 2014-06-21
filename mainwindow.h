@@ -28,24 +28,16 @@ class MainWindow : public QMainWindow
     ToolType::toolType currentToolType;
     QToolBar *toolBox;
 
-    //QList<ToolBar*> toolBars;
-
     QMenu *fileMenu;
     QMenu *filterMenu;
     QMenu *windowWidgetMenu;
     QMenu *aboutMenu;
-
-    QSignalMapper *mapper;
-    QList<QDockWidget*> extraDockWidgets;
-    QAction *createDockWidgetAction;
-    QMenu *destroyDockWidgetMenu;
 
 public:
     MainWindow(QWidget *parent = 0);
     //~MainWindow();
 
 protected:
-    void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
 //    void keyPressEvent(QKeyEvent *event);
 
@@ -54,14 +46,9 @@ public slots:
     void saveFile();
     bool saveWrite(const QByteArray);
     bool maybeSave();
-    //void penColor();
 
     void saveLayout();
     void loadLayout();
-
-
-    //void createDockWidget();
-    //void destroyDockWidget(QAction *action);
 
     void about();
 
@@ -107,11 +94,9 @@ private slots:
     }
 
     void setColor(int);
-    //void setBgColor(void);
 
 signals:
     void updateColorIcon(int, QColor);
-    //void updateBgColorIcon();
 };
 
 

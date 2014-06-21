@@ -41,8 +41,8 @@
 
 Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
-/// Constructor Construct a MainWindow object.
-/// @param [QWidget *parent] Parent QWidget
+/// Constructor
+/// @param [parent] Parent QWidget
 MainWindow::MainWindow(QWidget *parent)
     :QMainWindow(parent)
 {
@@ -92,9 +92,9 @@ public:
     static int actionNum; ///< Static num to track the number of objects have been created
     int id;  ///< ID number of the action
     /// Constructor
-    /// @param [const QIcon &icon] Icon of the action
-    /// @param [const QString &text] Label of the action
-    /// @param [QObject *parent] Parent widget.
+    /// @param [icon] Icon of the action
+    /// @param [text] Label of the action
+    /// @param [parent] Parent widget.
     ColorIconAction(const QIcon &icon, const QString &text, QObject *parent)
         :QAction(icon, text, parent) {}
 
@@ -106,8 +106,8 @@ public slots:
 
 int ColorIconAction::actionNum;
 
-/// @param [int id] Indicate which icon to update according to this id
-/// @param [QColor color] The new color
+/// @param [id] Indicate which icon to update according to this id
+/// @param [color] The new color
 void ColorIconAction::updateColorIcon(int id, QColor color)
 {
     if(id!=this->id) return;
@@ -210,7 +210,6 @@ void MainWindow::setupToolBar()
     fgColorAct->setStatusTip(tr("To change the frontground color"));
     connect(fgColorAct, SIGNAL(triggered()), signalMapper, SLOT(map()));
     signalMapper->setMapping(fgColorAct,fgColorAct->id);
-    //connect(fgColorAct, SIGNAL(triggered()), this, SLOT(setFgColor()));
     connect(this, &MainWindow::updateColorIcon, fgColorAct, &ColorIconAction::updateColorIcon);
     toolBox->addAction(fgColorAct);
 
@@ -221,7 +220,6 @@ void MainWindow::setupToolBar()
     bgColorAct->setStatusTip(tr("To change the background color"));
     connect(bgColorAct, SIGNAL(triggered()), signalMapper, SLOT(map()));
     signalMapper->setMapping(bgColorAct,bgColorAct->id);
-//    connect(fgColorAct, SIGNAL(triggered()), this, SLOT(setBgColor()));
     connect(this, &MainWindow::updateColorIcon, bgColorAct, &ColorIconAction::updateColorIcon);
     toolBox->addAction(bgColorAct);
 
@@ -244,18 +242,8 @@ void MainWindow::setColor(int id)
     //update();
 }
 
-//void MainWindow::setBgColor()
-//{
-//    QColorDialog dialog(this);
-//    dialog.exec();
-//    //if(dialog.) return;
-//    QColor color=dialog.selectedColor();
-//    centerScribbleArea->setBgColor(color);
-//    emit updateBgColorIcon();
-//    //update();
-//}
 
-/// @param [ToolType::toolType newToolType] The type of new tool
+/// @param [newToolType] The type of new tool
 void MainWindow::switchToolsToolBar(ToolType::toolType newToolType)
 {
     if(!toolsToolBar.contains(newToolType))
@@ -446,18 +434,6 @@ void MainWindow::loadLayout()
     }
 }
 
-QAction *addAction(QMenu *menu, const QString &text, QActionGroup *group, QSignalMapper *mapper,
-                    int id)
-{
-    bool first = group->actions().isEmpty();
-    QAction *result = menu->addAction(text);
-    result->setCheckable(true);
-    result->setChecked(first);
-    group->addAction(result);
-    QObject::connect(result, SIGNAL(triggered()), mapper, SLOT(map()));
-    mapper->setMapping(result, id);
-    return result;
-}
 
 void MainWindow::setupWindowWidgets()
 {
@@ -506,15 +482,9 @@ void MainWindow::setupWindowWidgets()
 }
 
 
-void MainWindow::showEvent(QShowEvent *event)
-{
-    QMainWindow::showEvent(event);
-}
-
 
 
 void MainWindow::closeEvent(QCloseEvent *event)
-//! [1] //! [2]
 {
     if (maybeSave()) {
         event->accept();
@@ -522,7 +492,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->ignore();
     }
 }
-//! [2]
 
 //void MainWindow::keyPressEvent(QKeyEvent *event)
 //{
@@ -545,7 +514,6 @@ void MainWindow::openFile()
 
 
 bool MainWindow::saveWrite(const QByteArray fileFormat)
-//! [19] //! [20]
 {
 
     QString initialPath = QDir::currentPath() + "/untitled." + fileFormat;
@@ -596,119 +564,3 @@ void MainWindow::about()
                "<p>If you are curious about the name, "
                "it's a tricky reverse of the powerful open software GIMP.</p>"));
 }
-
-
-
-/*
-
-
-class CreateDockWidgetDialog : public QDialog
-{
-public:
-    CreateDockWidgetDialog(QWidget *parent = 0);
-
-    QString objectName() const;
-    Qt::DockWidgetArea location() const;
-
-private:
-    QLineEdit *m_objectName;
-    QComboBox *m_location;
-};
-
-CreateDockWidgetDialog::CreateDockWidgetDialog(QWidget *parent)
-    : QDialog(parent)
-{
-    QGridLayout *layout = new QGridLayout(this);
-
-    layout->addWidget(new QLabel(tr("Object name:")), 0, 0);
-    m_objectName = new QLineEdit;
-    layout->addWidget(m_objectName, 0, 1);
-
-    layout->addWidget(new QLabel(tr("Location:")), 1, 0);
-    m_location = new QComboBox;
-    m_location->setEditable(false);
-    m_location->addItem(tr("Top"));
-    m_location->addItem(tr("Left"));
-    m_location->addItem(tr("Right"));
-    m_location->addItem(tr("Bottom"));
-    m_location->addItem(tr("Restore"));
-    layout->addWidget(m_location, 1, 1);
-
-    QHBoxLayout *buttonLayout = new QHBoxLayout;
-    layout->addLayout(buttonLayout, 2, 0, 1, 2);
-    buttonLayout->addStretch();
-
-    QPushButton *cancelButton = new QPushButton(tr("Cancel"));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-    buttonLayout->addWidget(cancelButton);
-    QPushButton *okButton = new QPushButton(tr("Ok"));
-    connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
-    buttonLayout->addWidget(okButton);
-
-    okButton->setDefault(true);
-}
-
-QString CreateDockWidgetDialog::objectName() const
-{
-    return m_objectName->text();
-}
-
-Qt::DockWidgetArea CreateDockWidgetDialog::location() const
-{
-    switch (m_location->currentIndex()) {
-        case 0: return Qt::TopDockWidgetArea;
-        case 1: return Qt::LeftDockWidgetArea;
-        case 2: return Qt::RightDockWidgetArea;
-        case 3: return Qt::BottomDockWidgetArea;
-        default:
-            break;
-    }
-    return Qt::NoDockWidgetArea;
-}
-
-void MainWindow::createDockWidget()
-{
-    CreateDockWidgetDialog dialog(this);
-    int ret = dialog.exec();
-    if (ret == QDialog::Rejected)
-        return;
-
-    QDockWidget *dw = new QDockWidget;
-    dw->setObjectName(dialog.objectName());
-    dw->setWindowTitle(dialog.objectName());
-    dw->setWidget(new QTextEdit);
-
-    Qt::DockWidgetArea area = dialog.location();
-    switch (area) {
-        case Qt::LeftDockWidgetArea:
-        case Qt::RightDockWidgetArea:
-        case Qt::TopDockWidgetArea:
-        case Qt::BottomDockWidgetArea:
-            addDockWidget(area, dw);
-            break;
-        default:
-            if (!restoreDockWidget(dw)) {
-                QMessageBox::warning(this, QString(), tr("Failed to restore dock widget"));
-                delete dw;
-                return;
-            }
-            break;
-    }
-
-    extraDockWidgets.append(dw);
-    destroyDockWidgetMenu->setEnabled(true);
-    destroyDockWidgetMenu->addAction(new QAction(dialog.objectName(), this));
-}
-
-void MainWindow::destroyDockWidget(QAction *action)
-{
-    int index = destroyDockWidgetMenu->actions().indexOf(action);
-    delete extraDockWidgets.takeAt(index);
-    destroyDockWidgetMenu->removeAction(action);
-    action->deleteLater();
-
-    if (destroyDockWidgetMenu->isEmpty())
-        destroyDockWidgetMenu->setEnabled(false);
-}
-*/
-
