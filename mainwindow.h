@@ -18,6 +18,7 @@ class ToolBar;
 QT_FORWARD_DECLARE_CLASS(QMenu)
 QT_FORWARD_DECLARE_CLASS(QSignalMapper)
 
+/// Create a MainWindow
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -67,10 +68,14 @@ public slots:
 private:
     IplImage *cvImg;
 
+    /// Create toolbar on the top and on the left(toolbox)
     void setupToolBar();
+    /// Create menus
     void setupMenuBar();
+    /// Create widgets on the right
     void setupWindowWidgets();
     void setDockOptions();
+    /// Switch to a new toolbar on the box when the tool changes
     void switchToolsToolBar(ToolType::toolType newToolType);
 
     //QMenu *saveAsMenu;
