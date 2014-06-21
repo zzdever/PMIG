@@ -3,7 +3,6 @@
 #include <QPainter>
 #include <QBitmap>
 
-//#include "opencvprocess.h"
 #include "scribblearea.h"
 
 //OpencvProcess::OpencvProcess(QWidget *parent)

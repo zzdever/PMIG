@@ -1,4 +1,5 @@
-﻿/// This file implements all the functions
+﻿/// @file
+/// This file implements all the functions
 /// to draw the graphic user interface,
 /// including toolbar, widget, menu, etc.
 ///
@@ -42,7 +43,7 @@
 Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
 /// Constructor
-/// @param [parent] Parent QWidget
+/// @param [in] parent Parent QWidget
 MainWindow::MainWindow(QWidget *parent)
     :QMainWindow(parent)
 {
@@ -84,17 +85,18 @@ MainWindow::MainWindow(QWidget *parent)
 //    ;
 //}
 
-/// Used to generate the color button on the toolbox,
-/// this action can update icon when necessary
+/// @brief Used to generate the color button on the toolbox
+///
+/// This action can update icon when necessary
 class ColorIconAction:public QAction
 {
 public:
     static int actionNum; ///< Static num to track the number of objects have been created
     int id;  ///< ID number of the action
     /// Constructor
-    /// @param [icon] Icon of the action
-    /// @param [text] Label of the action
-    /// @param [parent] Parent widget.
+    /// @param [in] icon Icon of the action
+    /// @param [in] text Label of the action
+    /// @param [in] parent Parent widget.
     ColorIconAction(const QIcon &icon, const QString &text, QObject *parent)
         :QAction(icon, text, parent) {}
 
@@ -106,8 +108,8 @@ public slots:
 
 int ColorIconAction::actionNum;
 
-/// @param [id] Indicate which icon to update according to this id
-/// @param [color] The new color
+/// @param [in] id Indicate which icon to update according to this id
+/// @param [in] color The new color
 void ColorIconAction::updateColorIcon(int id, QColor color)
 {
     if(id!=this->id) return;
@@ -227,6 +229,7 @@ void MainWindow::setupToolBar()
 
 }
 
+/// @param [in] id Indicate which color to update
 void MainWindow::setColor(int id)
 {
     QColorDialog dialog(this);
@@ -243,7 +246,7 @@ void MainWindow::setColor(int id)
 }
 
 
-/// @param [newToolType] The type of new tool
+/// @param [in] newToolType The type of new tool
 void MainWindow::switchToolsToolBar(ToolType::toolType newToolType)
 {
     if(!toolsToolBar.contains(newToolType))
@@ -512,7 +515,7 @@ void MainWindow::openFile()
 }
 
 
-
+/// @param [in] fileFormat Indicate in which file format to save
 bool MainWindow::saveWrite(const QByteArray fileFormat)
 {
 

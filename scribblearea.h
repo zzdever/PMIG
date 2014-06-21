@@ -13,19 +13,25 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "toolbox.h"
-#include "opencvprocess.h"
 #include "shared/hoverpoints.h"
 
 
-//! [0]
+/// QWidget in the center to scribble
 class ScribbleArea : public QWidget
 {
     Q_OBJECT
 
 public:
+    /// Constructor
     ScribbleArea(QWidget *parent = 0);
 
+    /// @brief Query whether the file is modified
+    /// @return Whether modified
+    /// @retval true Modified
+    /// @retval false Not modified or saved
     bool isModified() const { return modified; }
+    /// @brief Set the modification state of the file
+    /// @param [in] value True or false for modified or not modified
     void setModified(bool value) {modified = value; return; }
 
     void setToolType(ToolType::toolType type);

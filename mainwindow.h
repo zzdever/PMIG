@@ -18,43 +18,32 @@ class ToolBar;
 QT_FORWARD_DECLARE_CLASS(QMenu)
 QT_FORWARD_DECLARE_CLASS(QSignalMapper)
 
-/// Create a MainWindow
+/// Class to create the main window
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    ScribbleArea *centerScribbleArea;
-    QHash<ToolType::toolType, ToolTweak*> toolsToolBar;
-    ToolType::toolType currentToolType;
-    QToolBar *toolBox;
+    ScribbleArea *centerScribbleArea; ///< Area in the center
+    QHash<ToolType::toolType, ToolTweak*> toolsToolBar;  ///< A list of all of toolbars of every tool
+    ToolType::toolType currentToolType;  ///< Record the type of current selected tool
+    QToolBar *toolBox;  ///< The toolbox bar on the left
 
-    QMenu *fileMenu;
-    QMenu *filterMenu;
-    QMenu *windowWidgetMenu;
-    QMenu *aboutMenu;
+    QMenu *fileMenu;  ///< Menu File
+    QMenu *filterMenu;  ///<  Menu Filter
+    QMenu *windowWidgetMenu;  ///< Menu Window
+    QMenu *aboutMenu;   ///< Menu about
 
 public:
     MainWindow(QWidget *parent = 0);
     //~MainWindow();
 
 protected:
+    /// Rewrite to handle save or discard before quit
     void closeEvent(QCloseEvent *event);
 //    void keyPressEvent(QKeyEvent *event);
 
-public slots:
-    void openFile();
-    void saveFile();
-    bool saveWrite(const QByteArray);
-    bool maybeSave();
-
-    void saveLayout();
-    void loadLayout();
-
-    void about();
 
 private:
-    IplImage *cvImg;
-
     /// Create toolbar on the top and on the left(toolbox)
     void setupToolBar();
     /// Create menus
@@ -65,13 +54,25 @@ private:
     /// Switch to a new toolbar on the box when the tool changes
     void switchToolsToolBar(ToolType::toolType newToolType);
 
-    //QMenu *saveAsMenu;
-    //QMenu *fileMenu;
-
-//    QAction *printAct;
-//    QAction *clearScreenAct;
-
 private slots:
+    /// Open a file
+    void openFile();
+    /// Initiate a save file action and maintain whether the file has been modified
+    void saveFile();
+    /// Quiery whether to save the file
+    bool maybeSave();
+    /// Ask for format and save the file
+    bool saveWrite(const QByteArray);
+
+    /// Save the current window layout
+    void saveLayout();
+    /// Load a saved window layout
+    void loadLayout();
+
+    /// Show about information
+    void about();
+
+
     void setToolMarquee(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Marquee);
     }
@@ -93,6 +94,7 @@ private slots:
         if(toggle) switchToolsToolBar(ToolType::Lasso);
     }
 
+    /// Ask and set the foreground and background color
     void setColor(int);
 
 signals:
