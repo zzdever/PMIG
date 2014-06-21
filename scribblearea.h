@@ -136,7 +136,7 @@ private:
     void Mat2Ipl();
     void readjustRect();
     void dragMoveSelectedArea();
-    void rotateSelectedArea();
+    void rotateSelectedArea(QPoint firstPoint, QPoint lastPoint);
     IplImage* rotateImage2(IplImage* img, double angle);
 
 
