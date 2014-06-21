@@ -51,8 +51,7 @@ public:
     void setTransformSelectionState(void);
 
 public slots:
-//    void clearImage();
-//    void print();
+    void print();
     void updateDisplay(int changedImageNum);
     void updateCursor();
     void makeSelection(void);
