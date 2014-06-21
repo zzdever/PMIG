@@ -1,0 +1,13 @@
+digraph "/home/dever/Dropbox/dev" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_3d4573153b4fc7a4f2a2444a36640c40 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="Dropbox" fontname="Helvetica", fontsize="10", URL="dir_3d4573153b4fc7a4f2a2444a36640c40.html"]
+  subgraph clusterdir_1ae928ce5f41aedcc9332914d9d52f74 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_1ae928ce5f41aedcc9332914d9d52f74.html"];
+    dir_1ae928ce5f41aedcc9332914d9d52f74 [shape=plaintext label="dev"];
+    dir_b4eb87b9d1dc11f6c6cf91b7027db423 [shape=box label="PMIG" color="black" fillcolor="white" style="filled" URL="dir_b4eb87b9d1dc11f6c6cf91b7027db423.html"];
+  }
+  }
+}
