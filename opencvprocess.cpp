@@ -58,13 +58,11 @@ bool ScribbleArea::openImage(const QString &fileName)
 
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
-    IplImage *saveImg;
-/// @note Save image is not implemented
-    //cvCvtColor(imageStackEdit[currentImageNum], saveImg, CV_BGR2RGB);
-    qDebug()<<fileName.toStdString().c_str();
-    qDebug()<<fileFormat;
-    //cvSaveImage(fileName.toStdString().c_str(), saveImg);
 
+    if(currentImageNum>=0){
+        cv::Mat image(imageStackEdit[currentImageNum]);
+        cv::imwrite((fileName+QString(".")+fileFormat).toStdString(),image);
+    }
     return true;
 }
 

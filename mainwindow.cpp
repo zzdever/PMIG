@@ -271,7 +271,12 @@ void MainWindow::setupMenuBar()
     openAct->setShortcuts(QKeySequence::Open);
     connect(openAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    foreach (QByteArray format, QImageWriter::supportedImageFormats()) {
+    QList<QByteArray> supportedImageFormats;
+    supportedImageFormats.append(QByteArray("jpg"));
+    supportedImageFormats.append(QByteArray("bmp"));
+    supportedImageFormats.append(QByteArray("png"));
+    supportedImageFormats.append(QByteArray("tiff"));
+    foreach (QByteArray format, supportedImageFormats) {
         QString text = tr("%1...").arg(QString(format).toUpper());
 
         QAction *action = new QAction(text, this);

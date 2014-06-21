@@ -554,26 +554,25 @@ void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
 //    *image = newImage;
 //}
 
-//! [21]
-//void ScribbleArea::print()
-//{
-//#if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
-//    QPrinter printer(QPrinter::HighResolution);
 
-//    QPrintDialog printDialog(&printer, this);
-////! [21] //! [22]
-//    if (printDialog.exec() == QDialog::Accepted) {
-//        QPainter painter(&printer);
-//        QRect rect = painter.viewport();
-//        QSize size = image.size();
-//        size.scale(rect.size(), Qt::KeepAspectRatio);
-//        painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
-//        painter.setWindow(image.rect());
-//        painter.drawImage(0, 0, image);
-//    }
-//#endif // QT_NO_PRINTER
-//}
-//! [22]
+void ScribbleArea::print()
+{
+#if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
+    QPrinter printer(QPrinter::HighResolution);
+
+    QPrintDialog printDialog(&printer, this);
+
+    if (printDialog.exec() == QDialog::Accepted) {
+        QPainter painter(&printer);
+        QRect rect = painter.viewport();
+        QSize size = imageStackDisplay[currentImageNum].size();
+        size.scale(rect.size(), Qt::KeepAspectRatio);
+        painter.setViewport(rect.x(), rect.y(), size.width(), size.height());
+        painter.setWindow(imageStackDisplay[currentImageNum].rect());
+        painter.drawImage(0, 0, imageStackDisplay[currentImageNum]);
+    }
+#endif // QT_NO_PRINTER
+}
 
 
 QImage ScribbleArea::CVMatToQImage(const cv::Mat& imgMat)
