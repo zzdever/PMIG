@@ -58,8 +58,7 @@ bool ScribbleArea::openImage(const QString &fileName)
 
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
-    qDebug()<<fileName.toStdString().c_str();
-    qDebug()<<fileFormat;
+
     if(currentImageNum>=0){
         cv::Mat image(imageStackEdit[currentImageNum]);
         cv::imwrite((fileName+QString(".")+fileFormat).toStdString(),image);

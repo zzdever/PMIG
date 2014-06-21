@@ -35,7 +35,6 @@
 
 #include "mainwindow.h"
 #include "panels.h"
-#include "toolbar.h"
 
 
 #define TILE_SIZE 100
