@@ -12,7 +12,6 @@
 
 #include "scribblearea.h"
 #include "toolbox.h"
-#include "opencvprocess.h"
 
 class ToolBar;
 QT_FORWARD_DECLARE_CLASS(QMenu)
