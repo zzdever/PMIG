@@ -131,7 +131,7 @@ void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
         //and vertexRightBottom may be not RightBottom
         if(lastPoint.x()>vertexLeftTop.x+5 && lastPoint.x()<vertexRightBottom.x-5
                 && lastPoint.y()>vertexLeftTop.y+5 && lastPoint.y()<vertexRightBottom.y-5){
-//            qDebug()<<"In, move, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+            qDebug()<<"In, move, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
             dragMoveSelectedArea();
             for(QVector<CvPoint>::iterator iter=irregularSelectionPoints.begin();iter!=irregularSelectionPoints.end();iter++){
                 (*iter).x+=currentPoint.x()-lastPoint.x();
@@ -141,7 +141,7 @@ void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
         else if(lastPoint.x()<vertexLeftTop.x-5 || lastPoint.x()>vertexRightBottom.x+5
                 || lastPoint.y()<vertexLeftTop.y-5 || lastPoint.y()>vertexRightBottom.y+5){
             rotateSelectedArea();
-//            qDebug()<<"Out, rotate, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
+            qDebug()<<"Out, rotate, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
         }
         else{
 //            qDebug()<<"On, transform, form ("<<lastPoint.x()<<lastPoint.y()<<") to ("<<currentPoint.x()<<currentPoint.y()<<")";
@@ -268,9 +268,7 @@ void ScribbleArea::strokeSelectedArea(void)
 
     if(somethingSelected == false) return;
 
-//    foreach(CvPoint tmp, irregularSelectionPoints){
-//        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
-//    }
+
     int size=3;
     int lineType=CV_AA;
 
@@ -290,9 +288,6 @@ void ScribbleArea::fillSelectedArea(void)
 
     if(somethingSelected == false) return;
 
-//    foreach(CvPoint tmp, irregularSelectionPoints){
-//        qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
-//    }
     Ipl2Mat();
     drawMask();
     tmpImage.setTo(cv::Scalar(fgColor.blue(),fgColor.green(),fgColor.red()));
@@ -382,7 +377,7 @@ void ScribbleArea::cannyEdge(void){
 
     cv::Canny(tmpImage,tmpImage,threshold,threshold*3);
     cv::cvtColor(tmpImage,tmpImage,CV_GRAY2BGR);
-    qDebug()<<tmpImage.channels();
+//    qDebug()<<tmpImage.channels();
     Mat2Ipl();
 
     updateDisplay(currentImageNum);
