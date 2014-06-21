@@ -12,7 +12,6 @@
 
 #include "scribblearea.h"
 #include "toolbox.h"
-#include "opencvprocess.h"
 
 class ToolBar;
 QT_FORWARD_DECLARE_CLASS(QMenu)
@@ -50,7 +49,6 @@ private:
     void setupMenuBar();
     /// Create widgets on the right
     void setupWindowWidgets();
-    void setDockOptions();
     /// Switch to a new toolbar on the box when the tool changes
     void switchToolsToolBar(ToolType::toolType newToolType);
 

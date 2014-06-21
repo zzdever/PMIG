@@ -5,47 +5,8 @@
 
 #include "scribblearea.h"
 
-//OpencvProcess::OpencvProcess(QWidget *parent)
-//    :QWidget(parent)
-//{
-//    currentImageNum=-1;
-//    toolType=ToolType::Brush;
-//    somethingSelected=false;
 
-//    brushToolFunction = new BrushToolFunction(this);
-//    eraseToolFunction = new EraseToolFunction(this);
-
-//}
-
-//bool ScribbleArea::openImage(const char*fileName)
-//{
-//    Mat img = imread(fileName, CV_LOAD_IMAGE_COLOR);
-//    if(img.data)
-//    {
-//        imageStack.append(img);
-//        return true;
-//    }
-//    else
-//    {
-//        qDebug()<<"Unable to load image "<<fileName;
-//        return false;
-//    }
-//    IplImage *img = cvLoadImage(fileName);
-//    if(img)
-//    {
-//        imageStack.append(img);
-//        return true;
-//    }
-//    else
-//    {
-//        qDebug()<<"Unable to load image "<<fileName;
-//        return false;
-//    }
-//}
-
-//! [1]
 bool ScribbleArea::openImage(const QString &fileName)
-//! [1] //! [2]
 {
     if(totalImageNum == 1)
     {
@@ -80,11 +41,8 @@ bool ScribbleArea::openImage(const QString &fileName)
 //    update();
 //    return true;
 }
-//! [2]
 
-//! [3]
 //bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
-//! [3] //! [4]
 //{
 //    QImage visibleImage = image;
 //    resizeImage(&visibleImage, size());
@@ -97,7 +55,6 @@ bool ScribbleArea::openImage(const QString &fileName)
 //        return false;
 //    }
 //}
-//! [4]
 
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
@@ -111,12 +68,6 @@ bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
     return true;
 }
 
-
-
-//void ScribbleArea::setToolType(ToolType::toolType toolType)
-//{
-//    this->toolType = toolType;
-//}
 
 void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
 {

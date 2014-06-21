@@ -537,38 +537,12 @@ void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
     return;
 }
 
-////! [9]
-//void ScribbleArea::clearImage()
-////! [9] //! [10]
-//{
-//    image.fill(qRgb(255, 255, 255));
-//    modified = true;
-//    update();
-//}
-////! [10]
 
-
-////! [17]
-//void ScribbleArea::drawLineTo(const QPoint &endPoint)
-////! [17] //! [18]
-//{
-//    QPainter painter(&image);
-//    painter.setPen(QPen(myPenColor, myPenWidth, Qt::SolidLine, Qt::RoundCap,
-//                        Qt::RoundJoin));
-//    painter.setRenderHints(QPainter::Antialiasing);
-//    painter.drawLine(lastPoint, endPoint);
-//    modified = true;
-
-//    int rad = (myPenWidth / 2) + 2;
-//    update(QRect(lastPoint, endPoint).normalized()
+//  update(QRect(lastPoint, endPoint).normalized()
 //                                     .adjusted(-rad, -rad, +rad, +rad));
-//    lastPoint = endPoint;
-//}
-////! [18]
 
-////! [19]
+
 //void ScribbleArea::resizeImage(QImage *image, const QSize &newSize)
-////! [19] //! [20]
 //{
 //    if (image->size() == newSize)
 //        return;
@@ -579,7 +553,6 @@ void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
 //    painter.drawImage(QPoint(0, 0), *image);
 //    *image = newImage;
 //}
-////! [20]
 
 //! [21]
 //void ScribbleArea::print()

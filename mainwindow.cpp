@@ -34,7 +34,7 @@
 
 
 #include "mainwindow.h"
-#include "colorswatch.h"
+#include "panels.h"
 #include "toolbar.h"
 
 
@@ -72,9 +72,12 @@ MainWindow::MainWindow(QWidget *parent)
     centerScribbleArea->setFocusPolicy(Qt::WheelFocus);
 
     setupToolBar();
+
     setupMenuBar();
+
     setupWindowWidgets();
-    setDockOptions();
+    DockOptions dockOptions = AnimatedDocks|AllowTabbedDocks;
+    QMainWindow::setDockOptions(dockOptions);
 
     statusBar()->showMessage(tr("Ready"));
 
@@ -349,18 +352,6 @@ void MainWindow::setupMenuBar()
     menuBar()->addMenu(aboutMenu);
 }
 
-void MainWindow::setDockOptions()
-{
-    DockOptions dockOptions = AnimatedDocks|AllowTabbedDocks|ForceTabbedDocks;
-    QMainWindow::setDockOptions(dockOptions);
-
-
-//    QList<QAction*> actions = mainWindowMenu->actions();
-//    if (actions.at(0)->isChecked())
-//        opts |= AnimatedDocks;
-//    if (actions.at(1)->isChecked())
-//        opts |= AllowNestedDocks;
-}
 
 void MainWindow::saveLayout()
 {
@@ -442,50 +433,39 @@ void MainWindow::setupWindowWidgets()
 {
     qRegisterMetaType<QDockWidget::DockWidgetFeatures>();
 
-//    mapper = new QSignalMapper(this);
-//    connect(mapper, SIGNAL(mapped(int)), this, SLOT(setCorner(int)));
-
-//    QMenu *corner_menu = dockWidgetMenu->addMenu(tr("Top left corner"));
-//    QActionGroup *group = new QActionGroup(this);
-//    group->setExclusive(true);
-//    ::addAction(corner_menu, tr("Top dock area"), group, mapper, 0);
-//    ::addAction(corner_menu, tr("Left dock area"), group, mapper, 1);
-
-
     static const struct Set {
         const char * name;
         uint flags;
         Qt::DockWidgetArea area;
     } sets [] = {
-        { "Layer", 0, Qt::RightDockWidgetArea },
+        { "Info", 0, Qt::RightDockWidgetArea },
         { "ColorSwatch", 0, Qt::RightDockWidgetArea },
         { "Graph", 0, Qt::RightDockWidgetArea },
         { "Curve", 0, Qt::RightDockWidgetArea },
         { "Character", 0, Qt::RightDockWidgetArea },
-        { "Info", 0, Qt::RightDockWidgetArea }
+        { "Layer", 0, Qt::RightDockWidgetArea }
     };
     const int setCount = sizeof(sets) / sizeof(Set);
 
+    QList<Panel*> windowWidgetsList;
     for (int i = 0; i < setCount; ++i) {
-        ColorSwatch *swatch = new ColorSwatch(tr(sets[i].name), this, Qt::WindowFlags(sets[i].flags));
-        addDockWidget(sets[i].area, swatch);
-        windowWidgetMenu->addAction(swatch->windowWidgetAction);
-
+        Panel *panel = new Panel(tr(sets[i].name), this, Qt::WindowFlags(sets[i].flags));
+        panel->setAllowedAreas(Qt::RightDockWidgetArea);
+        windowWidgetsList.append(panel);
+        addDockWidget(sets[i].area, panel);
+        windowWidgetMenu->addAction(panel->windowWidgetAction);
     }
 
     QMainWindow::setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
     QMainWindow::setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-    //        if (qstrcmp(sets[i].name, "Blue") == 0) {
-    //            BlueTitleBar *titlebar = new BlueTitleBar(swatch);
-    //            swatch->setTitleBarWidget(titlebar);
-    //            connect(swatch, SIGNAL(topLevelChanged(bool)), titlebar, SLOT(updateMask()));
-    //            connect(swatch, SIGNAL(featuresChanged(QDockWidget::DockWidgetFeatures)), titlebar, SLOT(updateMask()), Qt::QueuedConnection);
-    //        }
+    QMainWindow::setTabPosition(Qt::RightDockWidgetArea, QTabWidget::North);
+    tabifyDockWidget(windowWidgetsList.at(0), windowWidgetsList.at(1));
+    windowWidgetsList.at(0)->raise();
+    tabifyDockWidget(windowWidgetsList.at(2), windowWidgetsList.at(3));
+    tabifyDockWidget(windowWidgetsList.at(3), windowWidgetsList.at(4));
+    windowWidgetsList.at(2)->raise();
 }
-
-
-
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -567,3 +547,21 @@ void MainWindow::about()
                "<p>If you are curious about the name, "
                "it's a tricky reverse of the powerful open software GIMP.</p>"));
 }
+
+
+//void MainWindow::setCurrentFile(const QString &fileName)
+//{
+//    curFile = fileName;
+//    //textEdit->document()->setModified(false);
+//    setWindowModified(false);
+
+//    QString shownName = curFile;
+//    if (curFile.isEmpty())
+//        shownName = "untitled";
+//    setWindowFilePath(shownName);
+//}
+
+//QString MainWindow::strippedName(const QString &fullFileName)
+//{
+//    return QFileInfo(fullFileName).fileName();
+//}
