@@ -1,4 +1,10 @@
-﻿#include <QtWidgets>
+﻿/// @file
+/// This file implements the scribblearea,
+/// contains event handlers, processing drivers
+/// and display control
+///
+
+#include <QtWidgets>
 #ifndef QT_NO_PRINTER
 #include <QPrinter>
 #include <QtPrintSupport/QPrinter>
@@ -7,6 +13,7 @@
 
 #include "scribblearea.h"
 
+/// @param [in] event The mouse press event
 void ScribbleArea::mousePressEvent(QMouseEvent *event)
 {
 
@@ -67,6 +74,7 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
     }
 }
 
+/// @param [in] event The mouse move event
 void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
 {
 //    qDebug()<<"move mouse";
@@ -123,6 +131,7 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+/// @param [in] event The mouse release event
 void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
 {
     if(totalImageNum <= 0) return;  
@@ -220,9 +229,7 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
 }
 
 
-
-
-
+/// @param [in] changedImageNum Indicate which imamge to update
 void ScribbleArea::updateDisplay(int changedImageNum)
 {
     if(changedImageNum > imageStackDisplay.size())
@@ -252,10 +259,11 @@ void ScribbleArea::updateDisplay(int changedImageNum)
     update();
 }
 
-//! [12] //! [13]
+
+/// @param [in] event The paint event
 void ScribbleArea::paintEvent(QPaintEvent *event)
-//! [13] //! [14]
 {
+    Q_UNUSED(event);
     QPainter painter(this);
 //    QRect dirtyRect = event->rect();
 //    painter.drawImage(dirtyRect, image, dirtyRect);
@@ -272,11 +280,9 @@ void ScribbleArea::paintEvent(QPaintEvent *event)
     }
 
 }
-//! [14]
 
-//! [15]
+/// @param [in] event The resize event
 void ScribbleArea::resizeEvent(QResizeEvent *event)
-//! [15] //! [16]
 {
 //    if (width() > image.width() || height() > image.height()) {
 //        int newWidth = qMax(width() + 128, image.width());
@@ -289,6 +295,7 @@ void ScribbleArea::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 }
 
+/// @param [in] event The key press event
 void ScribbleArea::keyPressEvent(QKeyEvent *event)
 {
     if(event->matches(QKeySequence::Delete))
@@ -303,6 +310,7 @@ void ScribbleArea::keyPressEvent(QKeyEvent *event)
     }
 }
 
+/// @param [in] event The mouse enter event
 void ScribbleArea::enterEvent(QEvent * event)
 {
     if(totalImageNum>0 && event->type() == QEvent::Enter){
@@ -310,6 +318,7 @@ void ScribbleArea::enterEvent(QEvent * event)
     }
 
 }
+
 
 void ScribbleArea::updateCursor()
 {
@@ -331,13 +340,14 @@ void ScribbleArea::updateCursor()
     }
 }
 
-
+/// @param [in] type The type of the current tool
 void ScribbleArea::setToolType(ToolType::toolType type)
 {
     toolType=type;
     if(totalImageNum>0) updateCursor();
     return;
 }
+
 
 
 void ScribbleArea::selectAll(void)
@@ -360,12 +370,15 @@ void ScribbleArea::selectAll(void)
     update();
 }
 
+/// @param [in] event The context menu event
 void ScribbleArea::contextMenuEvent(QContextMenuEvent *event)
 {
+    Q_UNUSED(event);
     if(toolType!=ToolType::Pen) return;
     QCursor cursor = this->cursor();
     penToolFunction->penMenu->exec(cursor.pos());
 }
+
 
 void ScribbleArea::makeSelection(void)
 {
@@ -381,8 +394,8 @@ void ScribbleArea::makeSelection(void)
         irregularSelectionPoints.clear();
         foreach(QPointF tmp, penToolFunction->penHandlerControl){
             lassoHandlerControl<<tmp;
-            irregularSelectionPoints.append({tmp.x()-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2),
-                                             tmp.y()-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)});
+            irregularSelectionPoints.append({static_cast<int>(tmp.x())-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2),
+                                             static_cast<int>(tmp.y())-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)});
         }
         lassoHandler->setCloseType(HoverPoints::Close);
         lassoHandler->setPoints(lassoHandlerControl);
@@ -443,9 +456,7 @@ void ScribbleArea::setTransformSelectionState(void)
     update();
 }
 
-
-//!
-//! [0]
+/// @param [in] parent The parent widget
 ScribbleArea::ScribbleArea(QWidget *parent)
     : QWidget(parent),
       toolIndicationAlpha(150)
@@ -500,8 +511,8 @@ ScribbleArea::ScribbleArea(QWidget *parent)
     //setMouseTracking(true);
 
 }
-//! [0]
 
+/// @param [in] newControlPoints The new points to set to the marquee handler
 void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
 {
 
@@ -557,6 +568,7 @@ void ScribbleArea::updateMarqueeHandlerControlPoints(QPolygonF newControlPoints)
 
 void ScribbleArea::print()
 {
+    if(totalImageNum<=0) return;
 #if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
     QPrinter printer(QPrinter::HighResolution);
 
@@ -575,14 +587,17 @@ void ScribbleArea::print()
 }
 
 
-QImage ScribbleArea::CVMatToQImage(const cv::Mat& imgMat)
-{
-    cv::Mat rgb;
-    cvtColor(imgMat, rgb, CV_BGR2RGB);
+//QImage ScribbleArea::CVMatToQImage(const cv::Mat& imgMat)
+//{
+//    cv::Mat rgb;
+//    cvtColor(imgMat, rgb, CV_BGR2RGB);
 
-    return QImage((const unsigned char*)rgb.data, rgb.cols, rgb.rows, QImage::Format_RGB888);
-}
+//    return QImage((const unsigned char*)rgb.data, rgb.cols, rgb.rows, QImage::Format_RGB888);
+//}
 
+/// @param [in] iplImage Pointer to an iplimage
+/// @param [in] mini Minimum size
+/// @param [in] maxi Maximum size
 QImage ScribbleArea::IplImage2QImage(const IplImage *iplImage, double mini, double maxi)
 {
     uchar *qImageBuffer = NULL;
@@ -760,6 +775,7 @@ QImage ScribbleArea::IplImage2QImage(const IplImage *iplImage, double mini, doub
     free(qImageBuffer);
     return qImage;
 }
+
 
 void ScribbleArea::readjustRect(){
     int minX=std::min(vertexLeftTop.x,vertexRightBottom.x);

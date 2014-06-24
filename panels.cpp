@@ -1,4 +1,7 @@
-﻿#include "panels.h"
+﻿/// @file
+/// This file implements the panels
+///
+#include "panels.h"
 
 #include <QAction>
 #include <QtEvents>
@@ -21,6 +24,8 @@
 
 #define PANEL_IMPLEMENTED
 
+/// @param [in] panelName Name for the panel
+/// @param [in] parent Parent widget
 PanelFrame::PanelFrame(const QString &panelName, QWidget *parent)
     : QFrame(parent)
 {
@@ -31,6 +36,7 @@ PanelFrame::PanelFrame(const QString &panelName, QWidget *parent)
     setFont(font);
 
 }
+
 
 void PanelFrame::paintEvent(QPaintEvent *)
 {
@@ -61,7 +67,9 @@ void PanelFrame::paintEvent(QPaintEvent *)
 }
 
 
-
+/// @param [in] panelName Name for the panel
+/// @param [in] parent Parent widget
+/// @param [in] flags Window style
 Panel::Panel(const QString &panelName, QWidget *parent, Qt::WindowFlags flags)
     : QDockWidget(parent, flags)
 {
@@ -78,6 +86,7 @@ Panel::Panel(const QString &panelName, QWidget *parent, Qt::WindowFlags flags)
 }
 
 
+/// @param [in] e The resize event
 void Panel::resizeEvent(QResizeEvent *e)
 {
     QDockWidget::resizeEvent(e);

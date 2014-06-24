@@ -41,7 +41,6 @@
 
 Q_DECLARE_METATYPE(QDockWidget::DockWidgetFeatures)
 
-/// Constructor
 /// @param [in] parent Parent QWidget
 MainWindow::MainWindow(QWidget *parent)
     :QMainWindow(parent)

@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow
     QMenu *aboutMenu;   ///< Menu about
 
 public:
+    /// Constructor
     MainWindow(QWidget *parent = 0);
     //~MainWindow();
 
@@ -71,23 +72,29 @@ private slots:
     void about();
 
 
+    /// Set tool to marquee
     void setToolMarquee(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Marquee);
     }
+    /// Set tool to brush
     void setToolBrush(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Brush);
     }
+    /// Set tool to pen
     void setToolPen(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Pen);
     }
+    /// Set tool to erase
     void setToolErase(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Erase);
     }
+    /// Set tool to transform
     void setToolTransform(bool toggle){
         if(toggle) {switchToolsToolBar(ToolType::Transform);
             centerScribbleArea->setTransformSelectionState();
         }
     }
+    /// Set tool to lasso
     void setToolLasso(bool toggle){
         if(toggle) switchToolsToolBar(ToolType::Lasso);
     }
@@ -96,6 +103,7 @@ private slots:
     void setColor(int);
 
 signals:
+    /// Update color icons on the toolbox bar
     void updateColorIcon(int, QColor);
 };
 

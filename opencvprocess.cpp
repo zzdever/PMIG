@@ -1,11 +1,20 @@
-﻿#include <QMouseEvent>
+﻿/// @file
+/// This file contains all the functions
+/// that actually do the processing work,
+/// powered by opencv library.
+///
+
+#include <QMouseEvent>
 #include <QWidget>
 #include <QPainter>
 #include <QBitmap>
 
 #include "scribblearea.h"
 
-
+/// @param fileName The name of the file to open
+/// @return Whether open successfully
+/// @retval true Scceed to open
+/// @retval false Fail to open
 bool ScribbleArea::openImage(const QString &fileName)
 {
     if(totalImageNum == 1)
@@ -32,41 +41,33 @@ bool ScribbleArea::openImage(const QString &fileName)
         return false;
     }
 
-
-
 //    QSize newSize = loadedImage.size().expandedTo(size());
 //    resizeImage(&loadedImage, newSize);
 //    image = loadedImage;
 //    modified = false;
 //    update();
 //    return true;
+
 }
 
-//bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
-//{
-//    QImage visibleImage = image;
-//    resizeImage(&visibleImage, size());
-//return true;
-    //if(saveImage(&(fileName.toStdString()[0]), fileFormat)){
-//    if (visibleImage.save(fileName, fileFormat)) {
-//        modified = false;
-//        return true;
-//    } else {
-//        return false;
-//    }
-//}
-
+/// @param fileName Save in what name
+/// @param fileFormat Save in which format
+/// @return Whether save successfully
+/// @retval true Scceed to save
+/// @retval false Fail to save
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat)
 {
-
+    Q_UNUSED(fileFormat);
     if(currentImageNum>=0){
         cv::Mat image(imageStackEdit[currentImageNum]);
-        cv::imwrite((fileName+QString(".")+fileFormat).toStdString(),image);
+        cv::imwrite((fileName).toStdString(),image);
     }
     return true;
 }
 
 
+/// @param [in] lastPoint The point where the mouse is last time
+/// @param [in] currentPoint The point where the mouse now is
 void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
 {
     switch (toolType) {
@@ -115,6 +116,7 @@ void ScribbleArea::ApplyToolFunction(QPoint lastPoint, QPoint currentPoint)
     updateDisplay(currentImageNum);
 }
 
+/// @param [in] currentPoint The point the mouse now is
 void ScribbleArea::ApplyToolFunction(QPoint currentPoint)
 {
     switch(toolType){
@@ -145,6 +147,8 @@ void ScribbleArea::ApplyToolFunction()
     updateDisplay(currentImageNum);
 }
 
+/// @param [in] lastPoint The first point of a line
+/// @param [in] currentPoinr The second point of a line
 void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
 {
     //Mat image = Mat::zeros(height, width, CV_8UC3);
@@ -292,7 +296,7 @@ void ScribbleArea::gaussianBlur(void){
 
     int size=sizeInputBox->value();
 
-    cv::GaussianBlur( tmpImage, tmpImage, cv::Size( size, size ), 0, 0 );
+    cv::GaussianBlur( tmpImage, tmpImage, cv::Size( size*2+1, size*2+1 ), 0, 0 );
     Mat2Ipl();
 
     updateDisplay(currentImageNum);
@@ -438,6 +442,7 @@ void ScribbleArea::Ipl2Mat(){
     tmpImage=tmp.clone();
 }
 
+/// @param [in] The value of the mask
 void ScribbleArea::drawMask(int value){
     mask=cv::Mat(imageStackEdit[currentImageNum]->height,imageStackEdit[currentImageNum]->width, CV_8U);
     mask.setTo(0);
@@ -529,6 +534,8 @@ void ScribbleArea::dragMoveSelectedArea()
     updateDisplay(currentImageNum);
 }
 
+/// @param [in] lastPoint The point where the mouse is last time
+/// @param [in] currentPoint The point where the mouse now is
 void ScribbleArea::rotateSelectedArea(QPoint firstPoint,QPoint lastPoint)
 {
     qDebug()<<"rotate";
@@ -612,6 +619,8 @@ void ScribbleArea::rotateSelectedArea(QPoint firstPoint,QPoint lastPoint)
     updateDisplay(currentImageNum);
 }
 
+/// @param [in] img The image to be rotated
+/// @param [in] anle The angle to rotate
 IplImage* ScribbleArea::rotateImage2(IplImage* img, double angle)
 {
     double a = sin(angle), b = cos(angle);

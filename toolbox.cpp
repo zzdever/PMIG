@@ -1,4 +1,7 @@
-﻿#include <QSpinBox>
+﻿/// @file
+/// This file implements all the tools.
+///
+#include <QSpinBox>
 #include <QLabel>
 #include <QCheckBox>
 #include <QComboBox>
@@ -7,72 +10,8 @@
 
 #include "toolbox.h"
 
-
-ToolBox::ToolBox(QWidget *parent)
-{
-    setupMarqueeToolBar(parent);
-    setupBrushToolBar(parent);
-    setupPenToolBar(parent);
-
-    currentToolBar = brushToolBar;
-}
-
-ToolBox::~ToolBox()
-{
-    foreach (QToolBar *tmpToolBar, toolBarList) {
-        delete tmpToolBar;
-    }
-
-}
-
-void ToolBox::setupMarqueeToolBar(QWidget *parent)
-{
-    marqueeToolBar = new QToolBar(("Marquee tool bar"),parent);
-    marqueeToolBar->setAllowedAreas(Qt::TopToolBarArea);
-    marqueeToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-    marqueeToolBar->setMovable(false);
-    QLabel *name = new QLabel("MARQUEE TOOL");
-    name->setFixedHeight(35);
-    marqueeToolBar->addWidget(name);
-    marqueeToolBar->addSeparator();
-    //marqueeToolBar->addWidget()
-    toolBarList.append(marqueeToolBar);
-}
-
-void ToolBox::setupBrushToolBar(QWidget *parent)
-{
-    brushToolBar = new QToolBar(("Brush tool bar"),parent);
-    brushToolBar->setAllowedAreas(Qt::TopToolBarArea);
-    brushToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-    brushToolBar->setMovable(false);
-    QLabel *name = new QLabel("BRUSH TOOL");
-    name->setFixedHeight(35);
-    brushToolBar->addWidget(name);
-    brushToolBar->addSeparator();
-    QSpinBox *brushSize = new QSpinBox;
-    brushSize->setRange(0,100);
-    brushToolBar->addWidget(brushSize);
-
-    toolBarList.append(brushToolBar);
-}
-
-void ToolBox::setupPenToolBar(QWidget *parent)
-{
-    penToolBar = new QToolBar(("Pen tool bar"),parent);
-    penToolBar->setAllowedAreas(Qt::TopToolBarArea);
-    penToolBar->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-    penToolBar->setMovable(false);
-    QLabel *name = new QLabel("PEN TOOL");
-    name->setFixedHeight(35);
-    penToolBar->addWidget(name);
-    penToolBar->addSeparator();
-    penSize = new QSpinBox;
-    penSize->setRange(0,100);
-    penToolBar->addWidget(penSize);
-
-    toolBarList.append(penToolBar);
-}
-
+/// @param [in] title Title for the tool
+/// @param [in] parent Parent widget
 ToolTweak::ToolTweak(const QString &title, QWidget *parent)
     :QToolBar(title, parent)
 {
@@ -91,6 +30,7 @@ int BrushToolBase::brushSize=2;
 int BrushToolBase::lineType;
 bool BrushToolBase::antiAliasing;
 
+/// @param [in] parent Parent widget
 BrushToolTweak::BrushToolTweak(QWidget *parent)
     :ToolTweak("BRUSH TOOL", parent)
 {
@@ -109,6 +49,7 @@ BrushToolTweak::BrushToolTweak(QWidget *parent)
     connect(antiAliasingCheckBox,SIGNAL(toggled(bool)),this, SLOT(setAntiAliasing(bool)));
 }
 
+/// @param [in] parent Parent widget
 BrushToolFunction::BrushToolFunction(QWidget *parent)
     :QObject(parent)
 {
@@ -120,6 +61,7 @@ BrushToolFunction::BrushToolFunction(QWidget *parent)
 int EraseToolBase::eraseSize=10;
 int EraseToolBase::eraseShape;
 
+/// @param [in] parent Parent widget
 EraseToolTweak::EraseToolTweak(QWidget *parent)
     :ToolTweak("ERASE TOOL", parent)
 {
@@ -131,6 +73,7 @@ EraseToolTweak::EraseToolTweak(QWidget *parent)
     connect(sizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEraseSize(int)));
 }
 
+/// @param [in] parent Parent widget
 EraseToolFunction::EraseToolFunction(QWidget *parent)
     :QObject(parent)
 {
@@ -140,6 +83,7 @@ EraseToolFunction::EraseToolFunction(QWidget *parent)
 //+++++++++++Marquee+TOOL+++++++++++++++++++++++++++++++++++++++
 int MarqueeToolBase::selectionType;
 
+/// @param [in] parent Parent widget
 MarqueeToolTweak::MarqueeToolTweak(QWidget *parent)
     :ToolTweak("MARQUEE TOOL", parent)
 {
@@ -151,6 +95,7 @@ MarqueeToolTweak::MarqueeToolTweak(QWidget *parent)
     connect(selectionTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectionType(int)));
 }
 
+/// @param [in] parent Parent widget
 MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
     :QObject(parent)
 {
@@ -158,7 +103,7 @@ MarqueeToolFunction::MarqueeToolFunction(QWidget *parent)
 }
 
 //+++++++++++Transform+TOOL+++++++++++++++++++++++++++++++++++++++
-
+/// @param [in] parent Parent widget
 TransformToolTweak::TransformToolTweak(QWidget *parent)
     :ToolTweak("TRANSFORM TOOL", parent)
 {
@@ -169,6 +114,7 @@ TransformToolTweak::TransformToolTweak(QWidget *parent)
     //temporary
 }
 
+/// @param [in] parent Parent widget
 TransformToolFunction::TransformToolFunction(QWidget *parent)
     :QObject(parent)
 {
@@ -177,6 +123,7 @@ TransformToolFunction::TransformToolFunction(QWidget *parent)
 
 
 //+++++++++++Lasso+TOOL+++++++++++++++++++++++++++++++++++++++
+/// @param [in] parent Parent widget
 bool LassoToolBase::magnetic=false;
 
 LassoToolTweak::LassoToolTweak(QWidget *parent)
@@ -188,6 +135,7 @@ LassoToolTweak::LassoToolTweak(QWidget *parent)
     connect(magneticCheckBox,SIGNAL(toggled(bool)),this, SLOT(setMagnetic(bool)));
 }
 
+/// @param [in] parent Parent widget
 LassoToolFunction::LassoToolFunction(QWidget *parent)
     :QObject(parent)
 {
@@ -196,13 +144,14 @@ LassoToolFunction::LassoToolFunction(QWidget *parent)
 
 
 //+++++++++++Pen+TOOL+++++++++++++++++++++++++++++++++++++++
-
+/// @param [in] parent Parent widget
 PenToolTweak::PenToolTweak(QWidget *parent)
     :ToolTweak("PEN TOOL", parent)
 {
     ;
 }
 
+/// @param [in] parent Parent widget
 PenToolFunction::PenToolFunction(QWidget *parent)
     :QObject(parent)
 {
