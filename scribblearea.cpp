@@ -1,7 +1,7 @@
 ﻿/// @file
 /// This file implements the scribblearea,
 /// contains event handlers, processing drivers
-/// and display control
+/// and display control.
 ///
 
 #include <QtWidgets>
