@@ -182,6 +182,7 @@ void ScribbleArea::drawLineTo(QPoint lastPoint, QPoint currentPoint)
         break;
     }
     default:{
+        lineType = CV_AA;
         color=fgColor;
         size=5;
         break;
@@ -458,6 +459,7 @@ void ScribbleArea::drawMask(int value){
 //            foreach(CvPoint tmp, irregularSelectionPoints){
 //                qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
 //            }
+            /*
             cv::Point points[1][irregularSelectionPoints.length()];
             for(int i=0;i<irregularSelectionPoints.length();i++){
                 points[0][i]=irregularSelectionPoints[i];
@@ -470,6 +472,7 @@ void ScribbleArea::drawMask(int value){
                       npt,
                       1,
                       value);
+                      */
         }
     }
 }

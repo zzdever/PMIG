@@ -6,7 +6,6 @@
 
 #include <QtWidgets>
 #ifndef QT_NO_PRINTER
-#include <QPrinter>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
 #endif
@@ -57,7 +56,7 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
                            << QPointF(event->pos().x(), event->pos().y());
                 break;
             case ToolType::Lasso:
-                irregularSelectionPoints.append({eventX, eventY});
+                irregularSelectionPoints.append(cvPoint(eventX, eventY));
                 irregularSelectionPointNum++;
                 lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
                 lassoHandler->setCloseType(HoverPoints::NoClose);
@@ -111,7 +110,7 @@ void ScribbleArea::mouseMoveEvent(QMouseEvent *event)
             break;
         }
         case ToolType::Lasso:{
-            irregularSelectionPoints.append({eventX, eventY});
+            irregularSelectionPoints.append(cvPoint(eventX, eventY));
             irregularSelectionPointNum++;
             lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
             lassoHandler->setPoints(lassoHandlerControl);
@@ -167,7 +166,7 @@ void ScribbleArea::mouseReleaseEvent(QMouseEvent *event)
             break;
         }
         case ToolType::Lasso:{
-            irregularSelectionPoints.append({eventX, eventY});
+            irregularSelectionPoints.append(cvPoint(eventX, eventY));
             irregularSelectionPointNum++;
             lassoHandlerControl<<QPointF(event->pos().x(), event->pos().y());
             lassoHandler->setPoints(lassoHandlerControl);
@@ -365,8 +364,8 @@ void ScribbleArea::selectAll(void)
     marqueeHandler->setPoints(marqueeHandlerControl);
     somethingSelected = true;
     selectionType=TwoPointsSelection;
-    vertexLeftTop={0,0};
-    vertexRightBottom={imageStackDisplay[currentImageNum].width(), imageStackDisplay[currentImageNum].height()};
+    vertexLeftTop=cvPoint(0,0);
+    vertexRightBottom=cvPoint(imageStackDisplay[currentImageNum].width(), imageStackDisplay[currentImageNum].height());
     update();
 }
 
@@ -394,8 +393,8 @@ void ScribbleArea::makeSelection(void)
         irregularSelectionPoints.clear();
         foreach(QPointF tmp, penToolFunction->penHandlerControl){
             lassoHandlerControl<<tmp;
-            irregularSelectionPoints.append({static_cast<int>(tmp.x())-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2),
-                                             static_cast<int>(tmp.y())-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)});
+            irregularSelectionPoints.append(cvPoint(static_cast<int>(tmp.x())-(imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2),
+                                             static_cast<int>(tmp.y())-(imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2)));
         }
         lassoHandler->setCloseType(HoverPoints::Close);
         lassoHandler->setPoints(lassoHandlerControl);
@@ -418,9 +417,9 @@ void ScribbleArea::setTransformSelectionState(void)
     if(selectionType == TwoPointsSelection){
         irregularSelectionPoints.clear();
         irregularSelectionPoints.append(vertexLeftTop);
-        irregularSelectionPoints.append({vertexRightBottom.x, vertexLeftTop.y});
+        irregularSelectionPoints.append(cvPoint(vertexRightBottom.x, vertexLeftTop.y));
         irregularSelectionPoints.append(vertexRightBottom);
-        irregularSelectionPoints.append({vertexLeftTop.x, vertexRightBottom.y});
+        irregularSelectionPoints.append(cvPoint(vertexLeftTop.x, vertexRightBottom.y));
         irregularSelectionPointNum = 4;
         selectionType = PolygonSelection;
     }
@@ -450,8 +449,8 @@ void ScribbleArea::setTransformSelectionState(void)
                               maxY+imageCentralPoint.y()-imageStackDisplay[currentImageNum].height()/2);
         marqueeHandler->setPoints(marqueeHandlerControl);
         lassoHandler->setPoints(lassoHandlerControl);
-        vertexLeftTop={minX, minY};
-        vertexRightBottom={maxX,maxY};
+        vertexLeftTop=cvPoint(minX, minY);
+        vertexRightBottom=cvPoint(maxX,maxY);
     }
     update();
 }

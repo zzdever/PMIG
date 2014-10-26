@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QList>
 #include <QCursor>
+#include <QVector>
 
 #include <cv.h>
 #include <highgui.h>
