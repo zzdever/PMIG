@@ -459,6 +459,23 @@ void ScribbleArea::drawMask(int value){
 //            foreach(CvPoint tmp, irregularSelectionPoints){
 //                qDebug()<<"("<<tmp.x<<","<<tmp.y<<")";
 //            }
+
+            cv::Point *points = new cv::Point[irregularSelectionPoints.length()];
+            for(int i=0;i<irregularSelectionPoints.length();i++){
+                points[i]=irregularSelectionPoints[i];
+            }
+            const cv::Point* ppt[1] = { points };
+            int npt[] = { irregularSelectionPoints.length() };
+
+            cv::fillPoly( mask,
+                      ppt,
+                      npt,
+                      1,
+                      value);
+
+            delete[] points;
+
+
             /*
             cv::Point points[1][irregularSelectionPoints.length()];
             for(int i=0;i<irregularSelectionPoints.length();i++){

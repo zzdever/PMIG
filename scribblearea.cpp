@@ -19,6 +19,12 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event)
     firstPoint=QPoint(event->pos().x(),event->pos().y());
     qDebug()<<"press mouse :"<<firstPoint;
 
+    //++++++++++++++++++++++++
+    // TODO
+    // can be reolaced with other events, like drag and move
+    // see the definition of qwidget
+    //
+    //++++++++++++++++++++++++++++++++++++
     if(totalImageNum <= 0) return;
     if (event->button() == Qt::LeftButton) {
 //        if(event->pos().rx()<imageCentralPoint.x()-imageStackDisplay[currentImageNum].width()/2)
